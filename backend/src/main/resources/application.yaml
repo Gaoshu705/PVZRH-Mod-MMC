@@ -1,0 +1,23 @@
+server:
+  port: 9091
+spring:
+  application:
+    name: mod-admin-server
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://127.0.0.1:3306/mod?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password:
+      database: 2
+
+file:
+  localPath: /home/mod/file
+  network: http://127.0.0.1:9091/static
+
+push:
+  url: https://mod.ehre.top/api

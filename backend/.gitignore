@@ -1,0 +1,34 @@
+# 编译输出目录
+/target/
+/build/
+# 临时文件和日志
+*.log
+*.tmp
+*.swp
+*.bak
+# IDE配置文件
+idea/
+*.iml
+*.ipr
+*.iws
+# Maven构建工具生成的文件
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+# Gradle构建工具生成的文件
+gradle/
+build/
+!gradle-wrapper.jar
+# 操作系统生成的文件
+DS_Store
+Thumbs.db
+# 敏感信息文件
+env
+*.properties
+# STS (Spring Tool Suite)
+springBeans
+# VS Code配置文件
+vscode/
