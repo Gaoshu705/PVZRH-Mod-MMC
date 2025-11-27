@@ -10,7 +10,7 @@
     </parent>
     <groupId>top.ehre.mod</groupId>
     <artifactId>mod-admin-server</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <name>mod-admin-server</name>
     <description>mod-admin-server</description>
     <url/>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.8.18</version>
+            <version>5.8.40</version>
         </dependency>
         <dependency>
             <groupId>com.github.penggle</groupId>
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.47</version>
+            <version>1.2.83</version>
         </dependency>
 
         <dependency>
