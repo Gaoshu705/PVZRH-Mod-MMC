@@ -69,7 +69,7 @@
         <div class="system-info">
           <div class="info-item">
             <span class="label">游戏路径：</span>
-            <span class="value text-ellipsis" :title="gamePath" @click="openGamePath">{{ gamePath || '未设置' }}</span>
+            <span class="value text-ellipsis" :title="gamePath" @click="openGamePath">{{ gamePath || '设置游戏路径' }}</span>
           </div>
           <div class="info-item">
             <span class="label">最后更新：</span>
@@ -92,6 +92,9 @@ import { MessagePlugin } from 'tdesign-vue-next';
 // 引入公共方法
 import { getGamePath, scanLocalMods, getModFramework } from '../utils/modUtils';
 import { openPath } from '@tauri-apps/plugin-opener';
+import { useRouter } from "vue-router";
+const router = useRouter();
+
 
 const loading = ref(false);
 const gamePath = ref('');
@@ -111,6 +114,7 @@ const enableRate = computed(() => {
 
 const openGamePath = async () => {
   if (!gamePath.value) {
+    router.push('/setting');
     MessagePlugin.warning('未设置游戏路径');
     return;
   }
