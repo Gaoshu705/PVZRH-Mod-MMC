@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -30,14 +30,13 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          workspaces: './mod-client'
           node-version: lts/*
-          cache: 'npm' # Set this to npm, yarn or pnpm.
+          cache: 'npm'
+          cache-dependency-path: './mod-client/package-lock.json'  # 指定锁文件路径
 
       - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
         with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Rust cache
@@ -46,14 +45,16 @@ jobs:
           workspaces: './mod-client/src-tauri -> target'
 
       - name: install frontend dependencies
-        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: npm install # change this to npm or pnpm depending on which one you use.
+        run: cd mod-client && npm install  # 进入目录再安装
+
+      - name: build frontend (如果需要)
+        run: cd mod-client && npm run build  # 如果需要构建前端
 
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: app-v__VERSION__
           releaseName: 'App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
