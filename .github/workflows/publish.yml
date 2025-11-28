@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: lts/*
           cache: 'npm'
-          cache-dependency-path: 'mod-client/'
+          cache-dependency-path: './mod-client/'
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
