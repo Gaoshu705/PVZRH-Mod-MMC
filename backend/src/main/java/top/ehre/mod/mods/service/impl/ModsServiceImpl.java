@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 // ---------------------------------------------------------
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  *  服务实现类
@@ -54,6 +55,9 @@ public class ModsServiceImpl extends ServiceImpl<ModsMapper, ModsEntity> impleme
         }
         Page<?> page = PageUtil.convert2PageQuery(modsPageDTO);
         List<ModsVO> list = modsMapper.queryPage(page, modsPageDTO);
+        for(ModsVO modsVO : list){
+            modsVO.setOtherAuthors(modsMapper.getOtherAuthors(modsVO.getId()));
+        }
         PageResult<ModsVO> pageResult = PageUtil.convert2PageResult(page, list);
         return pageResult;
     }
@@ -62,12 +66,25 @@ public class ModsServiceImpl extends ServiceImpl<ModsMapper, ModsEntity> impleme
     public List<ModsVO> getList() {
         // 根据字段is_visible 查询
         QueryWrapper<ModsEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("is_visible", true);
+        queryWrapper.eq("is_visible", true)
+                .orderByDesc("is_featured")
+                .orderByDesc("updated_at");
         List<ModsEntity> list = modsMapper.selectList( queryWrapper);
         List<ModsVO> listVO = list.stream().map(mods -> {
             ModsVO modsVO = new ModsVO();
             BeanUtils.copyProperties(mods, modsVO);
-            modsVO.setAuthorName(userService.get(mods.getAuthorId()).getNickname());
+            List<String> authorIds = modsMapper.getOtherAuthors(mods.getId());
+            String otherAuthorsName = "";
+            if (authorIds != null && authorIds.size() > 0) {
+                otherAuthorsName = "、";
+                for (String authorId : authorIds) {
+                    if (!Objects.equals(authorId, mods.getAuthorId())){
+                        otherAuthorsName += userService.get(authorId).getNickname() + "、";
+                    }
+                }
+                otherAuthorsName = otherAuthorsName.substring(0, otherAuthorsName.length() - 1);
+            }
+            modsVO.setAuthorName(userService.get(mods.getAuthorId()).getNickname() + otherAuthorsName);
             return modsVO;
         }).toList();
         return listVO;
@@ -122,6 +139,12 @@ public class ModsServiceImpl extends ServiceImpl<ModsMapper, ModsEntity> impleme
                 }
             }
         }
+        if (modsUpdateDTO.getOtherAuthors() != null) {
+            modsMapper.deleteOtherAuthor(modsUpdateDTO.getId());
+            modsUpdateDTO.getOtherAuthors().forEach(authorId -> {
+                addOtherAuthor(modsUpdateDTO.getId(), authorId);
+            });
+        }
         ModsEntity mods = new ModsEntity();
         BeanUtils.copyProperties(modsUpdateDTO, mods);
         if (mods.getId() == null) throw new BusinessException("主键不能为空");
@@ -149,5 +172,10 @@ public class ModsServiceImpl extends ServiceImpl<ModsMapper, ModsEntity> impleme
             modsVO.setAuthorName(userService.get(mods.getAuthorId()).getNickname());
         }
         return modsVO;
+    }
+
+    @Override
+    public int addOtherAuthor(String id, String authorId) {
+        return modsMapper.addOtherAuthor(id, authorId);
     }
 }

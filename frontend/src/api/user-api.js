@@ -23,5 +23,9 @@ export const userApi = {
 
   get: (id) => {
     return getRequest(`/user/${id}`);
+  },
+
+  getList: () => {
+    return getRequest('/user/list');
   }
 };

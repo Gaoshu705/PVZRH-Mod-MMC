@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="top.ehre.mod.mods.mapper.ModsMapper">
-
+    <insert id="addOtherAuthor">
+        insert into mods_other_author (mod_id, author_id) values (#{id}, #{authorId})
+    </insert>
+    <delete id="deleteOtherAuthor">
+        delete from mods_other_author where mod_id = #{id}
+    </delete>
+    <select id="getOtherAuthors" resultType="java.lang.String">
+        select author_id from mods_other_author where mod_id = #{id}
+    </select>
 </mapper>

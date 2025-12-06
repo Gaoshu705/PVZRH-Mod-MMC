@@ -31,7 +31,7 @@ public class ModsController {
     private ModsService modsService;
 
     @PostMapping("/page")
-//    @PreAuthorize("hasAuthority('business:mods:get')")
+    @PreAuthorize("hasAuthority('business:mods:get')")
     public Result page(@RequestBody ModsPageDTO modsPageDTO) {
         PageResult<ModsVO> page = modsService.page(modsPageDTO);
         return Result.success(page);

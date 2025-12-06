@@ -31,5 +31,8 @@ public interface ModsService extends IService<ModsEntity> {
     boolean update(ModsUpdateDTO modsUpdateDTO);
 
     List<ModsVO> getList();
+
     ModsVO get(String id);
+
+    int addOtherAuthor(String id, String authorId);
 }

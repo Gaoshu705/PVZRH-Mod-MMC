@@ -1,10 +1,13 @@
 package top.ehre.mod.system.user.controller;
 
+import org.springframework.security.core.Authentication;
 import top.ehre.mod.security.authentication.UserInfo;
+import top.ehre.mod.system.role.domain.entity.RoleEntity;
 import top.ehre.mod.system.user.domain.dto.RegisterDTO;
 import top.ehre.mod.system.user.domain.dto.UserAddDTO;
 import top.ehre.mod.system.user.domain.dto.UserPageDTO;
 import top.ehre.mod.system.user.domain.dto.UserUpdateDTO;
+import top.ehre.mod.system.user.domain.entity.UserEntity;
 import top.ehre.mod.system.user.domain.vo.UserVO;
 import top.ehre.mod.system.user.service.UserService;
 import top.ehre.mod.util.PageResult;
@@ -14,7 +17,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -58,7 +63,7 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    @PreAuthorize("hasAuthority('system:user:upd')")
+    @PreAuthorize("hasAuthority('system:user:upd') or #userUpdateDTO.username == authentication.principal")
     public Result update(@RequestBody UserUpdateDTO userUpdateDTO) {
         boolean updated = userService.update(userUpdateDTO);
         return Result.info(updated, null);
@@ -81,6 +86,11 @@ public class UserController {
     @PostMapping("/register")
     public Result register(@RequestBody RegisterDTO registerDTO) {
         return Result.success(userService.register(registerDTO));
+    }
+
+    @GetMapping("/list")
+    public Result list() {
+        return Result.success(userService.getSameRoleUsers());
     }
 
 }

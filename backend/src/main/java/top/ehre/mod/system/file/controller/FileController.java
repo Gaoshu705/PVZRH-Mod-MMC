@@ -29,7 +29,7 @@ public class FileController {
 
 
     @PostMapping("upload")
-    @PreAuthorize("hasAuthority('system:file:upload')")
+    @PreAuthorize("hasAuthority('system:file:upload')  or isAuthenticated()")
     public Result fileUpload(@RequestParam MultipartFile file,
                              @RequestParam("folderType") Byte folderType) {
         return fileService.fileUpload(file, folderType);

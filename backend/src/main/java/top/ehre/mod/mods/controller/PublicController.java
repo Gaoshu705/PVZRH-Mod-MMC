@@ -24,8 +24,14 @@ public class PublicController {
     private ModsService modsService;
 
     @GetMapping("/mod")
-    public Result page() {
+    public Result modList() {
         return Result.success(modsService.getList());
+    }
+
+    @GetMapping("/mod/page")
+    public Result modPage(@RequestBody ModsPageDTO modsPageDTO) {
+        PageResult<ModsVO> page = modsService.page(modsPageDTO);
+        return Result.success(page);
     }
 
     @GetMapping("/mod/{id}")

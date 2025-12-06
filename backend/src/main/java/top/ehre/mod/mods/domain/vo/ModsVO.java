@@ -34,6 +34,9 @@ public class ModsVO {
     @ApiModelProperty("作者名称")
     private String authorName;
 
+    @ApiModelProperty("其他作者")
+    private List<String> otherAuthors;
+
     @ApiModelProperty("Mod介绍")
     private String modDescription;
 

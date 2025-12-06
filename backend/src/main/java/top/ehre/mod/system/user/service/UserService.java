@@ -36,4 +36,6 @@ public interface UserService extends IService<UserEntity> {
     UserInfo getUserInfo(String username);
 
     UserVO register(RegisterDTO registerDTO);
+
+    List<UserVO> getSameRoleUsers();
 }

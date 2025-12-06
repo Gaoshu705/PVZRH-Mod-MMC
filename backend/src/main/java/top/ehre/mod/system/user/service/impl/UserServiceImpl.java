@@ -1,6 +1,9 @@
 package top.ehre.mod.system.user.service.impl;
 
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import top.ehre.mod.exception.BusinessException;
 import top.ehre.mod.security.authentication.UserInfo;
 import top.ehre.mod.system.menu.domain.entity.MenuEntity;
@@ -219,5 +222,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         user.setAvatar(pushUrl + "/default/avatar.png");
         boolean saved = save(user);
         return get(user.getUserId());
+    }
+
+    @Override
+    public List<UserVO> getSameRoleUsers() {
+        List<UserEntity> list = this.list();
+        List<UserVO> res = new ArrayList<>();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserInfo loginUserInfo = getUserInfo(authentication.getName());
+
+        for (UserEntity userEntity : list) {
+            UserInfo targetUserInfo = getUserInfo(userEntity.getUsername());
+
+            // 判断两个用户角色集合是否有交集
+            boolean hasCommonRole = false;
+            for (RoleEntity role : loginUserInfo.getRoles()) {
+                if (targetUserInfo.getRoles().contains(role)) {
+                    hasCommonRole = true;
+                    break;
+                }
+            }
+
+            if (hasCommonRole) {
+                UserVO userVO = new UserVO();
+                BeanUtils.copyProperties(userEntity, userVO);
+                userVO.setCreateUser(null);
+                userVO.setUsername("******");
+                userVO.setPassword("******");
+                userVO.setUpdateUser(null);
+                res.add(userVO);
+            }
+        }
+        return res;
     }
 }

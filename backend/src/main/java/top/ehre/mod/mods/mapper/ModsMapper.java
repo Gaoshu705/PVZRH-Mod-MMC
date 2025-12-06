@@ -22,11 +22,13 @@ import java.util.List;
 @Mapper
 @Component
 public interface ModsMapper extends BaseMapper<ModsEntity> {
-
-
-
     @SelectProvider(type = ModsSqlProvider.class, method = "queryPage")
     List<ModsVO> queryPage(Page page, @Param("pageDTO") ModsPageDTO pageDTO);
+    int addOtherAuthor(@Param("id") String modId, @Param("authorId") String authorId);
+
+    List<String> getOtherAuthors(@Param("id") String modId);
+
+    int deleteOtherAuthor(@Param("id") String modId);
 
     class ModsSqlProvider {
         public String queryPage(final Page page, final ModsPageDTO pageDTO) {
@@ -39,5 +41,6 @@ public interface ModsMapper extends BaseMapper<ModsEntity> {
             }}.toString();
         }
     }
+    
 
 }
