@@ -94,7 +94,7 @@ const rules = {
     { required: true, message: '请输入确认密码', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' },
     {
-      pattern: /^[a-zA-Z0-9_]+$/,
+      pattern: /^[a-zA-Z0-9_.]+$/,
       message: '密码只能包含英文字母、数字和下划线',
       trigger: 'blur'
     }

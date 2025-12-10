@@ -7,6 +7,23 @@
         <p>管理游戏目录下的插件文件</p>
       </div>
       <div class="header-actions">
+        <!-- 新增：批量操作按钮组 -->
+        <div class="batch-actions" v-if="selectedRowKeys.length > 0">
+          <t-button theme="success" variant="outline" @click="handleBatch(true)" :loading="batchLoading">
+            <template #icon>
+              <CheckCircleIcon />
+            </template>
+            开启
+          </t-button>
+          <t-button theme="danger" variant="outline" @click="handleBatch(false)" :loading="batchLoading">
+            <template #icon>
+              <StopCircleIcon />
+            </template>
+            关闭
+          </t-button>
+          <t-divider layout="vertical" />
+        </div>
+
         <t-button theme="default" variant="outline" @click="initData" :loading="loading">
           <template #icon>
             <RefreshIcon />
@@ -25,8 +42,9 @@
     <!-- 内容区域 -->
     <div class="page-content">
       <t-card :bordered="false" class="main-card">
+        <!-- 修改：添加 selected-row-keys 和 columns绑定 -->
         <t-table :data="modList" :columns="columns" :loading="loading" row-key="name" stripe :hover="true" height="100%"
-          :header-affixed-top="true" table-layout="auto">
+          :header-affixed-top="true" table-layout="auto" v-model:selected-row-keys="selectedRowKeys">
           <!-- 状态列 -->
           <template #status="{ row }">
             <t-tag v-if="row.isEnabled" theme="success" variant="light" shape="round">
@@ -41,22 +59,17 @@
             </t-tag>
           </template>
 
-          <!-- 名字列 (优化显示结构) -->
+          <!-- 名字列 -->
           <template #name="{ row }">
             <div class="mod-info-cell">
-              <!-- 图标状态区分 -->
               <div class="icon-wrapper" :class="{ 'disabled': !row.isEnabled }">
                 <AppIcon v-if="row.isEnabled" />
                 <StopCircleIcon v-else />
               </div>
-
-              <!-- 名称显示逻辑 -->
               <div class="text-wrapper">
-                <!-- 显示匹配到的中文名，如果没有则显示文件名主体 -->
                 <div class="mod-title" :class="{ 'text-disabled': !row.isEnabled }">
                   {{ getMatchInfo(row.name) || formatFileName(row.name) }}
                 </div>
-                <!-- 如果有中文名，则在下方显示原始文件名 -->
                 <div class="mod-filename" v-if="getMatchInfo(row.name)">
                   {{ row.name }}
                 </div>
@@ -100,7 +113,6 @@ import { openPath } from '@tauri-apps/plugin-opener';
 import { fetch } from '@tauri-apps/plugin-http';
 import { scanLocalMods, getPluginsDirectory, type LocalModInfo } from '../utils/modUtils';
 
-// 1. 类型定义优化
 interface UIModItem extends LocalModInfo {
   processing: boolean;
 }
@@ -112,67 +124,61 @@ interface OnlineModItem {
 }
 
 const loading = ref(false);
+const batchLoading = ref(false); // 批量操作loading
 const modList = ref<UIModItem[]>([]);
-// 使用 Map 存储在线模组信息，Key为小写的英文名，Value为中文名
 const onlineModMap = ref<Map<string, string>>(new Map());
 
+// 新增：选中行的 Keys
+const selectedRowKeys = ref<string[]>([]);
+
+// 修改：添加多选列配置
 const columns = [
-  { colKey: 'name', title: '模组信息', width: '60%', ellipsis: true },
-  { colKey: 'status', title: '状态', width: '15%' },
+  { colKey: 'row-select', type: 'multiple', width: '8%', align: 'center' }, // 新增多选列
+  { colKey: 'name', title: '模组信息', width: '57%', ellipsis: true },
+  { colKey: 'status', title: '状态', width: '10%' },
   { colKey: 'action', title: '操作', width: '25%', align: 'right' },
 ];
 
-// 2. 纯净文件名提取工具 (去除后缀)
 const formatFileName = (fullName: string): string => {
   return fullName.replace(/\.dll(-close)?$/i, '');
 };
 
-// 3. 获取在线模组数据 (构建 Map)
 const fetchOnlineData = async () => {
   try {
     const response = await fetch('https://mod.ehre.top/api/public/mod', {
       method: 'GET',
       headers: { 'User-Agent': 'Tauri-App' }
     });
-    if (!response.ok) return; // 失败静默处理，不影响本地功能
-
+    if (!response.ok) return;
     const json = await response.json();
     const list: OnlineModItem[] = json.data || [];
-
-    // 清空并重新构建 Map
     onlineModMap.value.clear();
     list.forEach(item => {
       if (item.englishName && item.modName) {
-        //以此 EnglishName 的小写作为 Key
         onlineModMap.value.set(item.englishName.toLowerCase(), item.modName);
       }
     });
   } catch (error) {
-    console.warn('在线模组信息获取失败，将仅显示文件名', error);
+    console.warn('在线模组信息获取失败', error);
   }
 };
 
-// 4. 获取匹配的中文名
 const getMatchInfo = (fileName: string): string | undefined => {
   const cleanName = formatFileName(fileName).toLowerCase();
   return onlineModMap.value.get(cleanName);
 };
 
-// 5. 初始化/刷新数据 (并行处理)
 const initData = async () => {
   loading.value = true;
+  selectedRowKeys.value = []; // 刷新时清空选中
   try {
-    // 并行执行：扫描本地 和 获取在线信息
     const [localMods, _] = await Promise.all([
       scanLocalMods(),
       fetchOnlineData()
     ]);
-
-    // 合并数据
     modList.value = localMods
       .map(m => ({ ...m, processing: false }))
       .sort((a, b) => a.name.localeCompare(b.name));
-
   } catch (err) {
     console.error(err);
     MessagePlugin.error('加载模组列表失败');
@@ -181,39 +187,116 @@ const initData = async () => {
   }
 };
 
-// 6. 开关逻辑
-const handleToggle = async (row: UIModItem) => {
-  row.processing = true;
+// --- 新增：核心重命名逻辑抽离 ---
+// 返回值: boolean (是否成功)
+const executeModStateChange = async (row: UIModItem, targetEnable: boolean): Promise<boolean> => {
   try {
     const pluginsDir = await getPluginsDirectory();
     if (!pluginsDir) throw new Error('路径丢失');
 
-    const targetEnable = row.isEnabled;
-    // 逻辑优化：根据当前文件名直接判断，更加稳健
-    const newFileName = targetEnable
-      ? row.fileName.replace(/-close$/, '') // 开启：去后缀
-      : row.fileName + '-close';           // 关闭：加后缀
+    // 如果状态已经是目标状态，直接跳过（视为成功）
+    if (row.isEnabled === targetEnable) return true;
 
-    // 防止重复后缀 (虽然正则已处理，但在文件名已经是正确格式时做保护)
-    if (!targetEnable && row.fileName.endsWith('-close')) {
-      throw new Error('文件状态异常');
-    }
+    const newFileName = targetEnable
+      ? row.fileName.replace(/-close$/, '')
+      : row.fileName + '-close';
+
+    // 安全检查
+    if (!targetEnable && row.fileName.endsWith('-close')) return true;
 
     const newPath = await join(pluginsDir, newFileName);
     await rename(row.fullPath, newPath);
 
-    // 更新本地状态
+    // 更新内存对象状态 (UI更新依赖)
     row.fileName = newFileName;
     row.fullPath = newPath;
     row.name = newFileName;
+    row.isEnabled = targetEnable;
 
-    MessagePlugin.success({ content: targetEnable ? '已启用' : '已禁用', duration: 1000 });
+    return true;
   } catch (error) {
-    console.error(error);
-    MessagePlugin.error('操作失败，可能文件被占用');
-    row.isEnabled = !row.isEnabled; // 失败回滚
+    console.error(`Failed to toggle ${row.name}:`, error);
+    return false;
+  }
+};
+
+// 修改：单条切换逻辑使用通用函数
+const handleToggle = async (row: UIModItem) => {
+  row.processing = true;
+  // 注意：Switch 组件已经修改了 v-model (row.isEnabled)，这里 target 是当前值
+  const targetState = row.isEnabled;
+
+  // 先把状态回滚，因为 executeModStateChange 会负责设置状态
+  // 或者为了 UI 响应更快，我们在失败时回滚。
+  // 这里的逻辑稍微调整：因为 Switch 点击瞬间值已经变了
+  // 如果我们想要精确控制，最好手动处理 rename
+
+  // 恢复 Switch 的变动，由 execute 函数全权接管
+  row.isEnabled = !targetState;
+
+  const success = await executeModStateChange(row, targetState);
+
+  if (success) {
+    MessagePlugin.success({ content: targetState ? '已启用' : '已禁用', duration: 1000 });
+  } else {
+    MessagePlugin.error('操作失败');
+    // 状态已经在 executeModStateChange 内部通过引用修改了，
+    // 或者失败时没修改，所以这里不需要额外回滚，只需处理加载状态
+  }
+  row.processing = false;
+};
+
+// --- 新增：批量处理逻辑 ---
+const handleBatch = async (enable: boolean) => {
+  if (selectedRowKeys.value.length === 0) return;
+
+  batchLoading.value = true;
+  let successCount = 0;
+  let failCount = 0;
+
+  try {
+    // 筛选出需要被操作的行（即选中 且 状态与目标不一致的）
+    const targets = modList.value.filter(item =>
+      selectedRowKeys.value.includes(item.name) && item.isEnabled !== enable
+    );
+
+    if (targets.length === 0) {
+      MessagePlugin.info('选中项已处于目标状态');
+      batchLoading.value = false;
+      return;
+    }
+
+    // 并行执行所有重命名操作
+    const results = await Promise.all(
+      targets.map(row => {
+        row.processing = true; // 开启单行 loading
+        return executeModStateChange(row, enable).then(res => {
+          row.processing = false;
+          return res;
+        });
+      })
+    );
+
+    successCount = results.filter(r => r).length;
+    failCount = results.filter(r => !r).length;
+
+    // 清空选中状态，因为文件名变了，key 也会变，必须重置
+    selectedRowKeys.value = [];
+
+    // 重新排序或刷新列表以确保一致性 (因为名字变了，排序可能乱了)
+    // 简单起见，直接重新获取一次列表最稳妥
+    await initData();
+
+    if (failCount === 0) {
+      MessagePlugin.success(`批量操作成功 (${successCount} 个)`);
+    } else {
+      MessagePlugin.warning(`操作完成：成功 ${successCount} 个，失败 ${failCount} 个`);
+    }
+
+  } catch (e) {
+    MessagePlugin.error('批量操作发生错误');
   } finally {
-    row.processing = false;
+    batchLoading.value = false;
   }
 };
 
@@ -341,5 +424,16 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* 简单的布局样式补充 */
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.batch-actions {
+  display: flex;
+  gap: 8px;
 }
 </style>
