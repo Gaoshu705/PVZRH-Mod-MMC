@@ -18,7 +18,7 @@
               手动安装
             </t-button>
 
-            <t-button theme="primary" variant="outline" @click="fetchMods" :loading="loading">
+            <t-button theme="primary" variant="outline" @click="fetchMods" :loading="isLoading">
               <template #icon>
                 <RefreshIcon />
               </template>
@@ -41,6 +41,19 @@
             <t-option value="1" label="BepInEx" />
             <t-option value="2" label="MelonLoader" />
           </t-select>
+
+          <t-select v-model="filterAuthor" placeholder="全部作者" style="width: 140px">
+            <t-option value="all" label="全部作者" />
+            <t-option v-for="author in uniqueAuthors" :key="author" :value="author" :label="author" />
+          </t-select>
+
+          <t-select v-model="filterUpdateTime" placeholder="更新时间" style="width: 140px">
+            <t-option value="all" label="全部时间" />
+            <t-option value="week" label="最近一周" />
+            <t-option value="month" label="最近一月" />
+            <t-option value="quarter" label="最近三月" />
+            <t-option value="year" label="最近一年" />
+          </t-select>
         </t-space>
       </t-row>
     </div>
@@ -48,12 +61,12 @@
     <!-- 内容滚动区域 -->
     <div class="content-scroll-area">
       <!-- 加载状态 -->
-      <div v-if="loading" class="loading-state">
+      <div v-if="isLoading" class="loading-state">
         <t-loading text="正在获取模组列表..." size="small"></t-loading>
       </div>
 
-      <!-- 瀑布流布局 -->
-      <div v-else-if="filteredModList.length > 0" class="mod-waterfall">
+      <!-- 左右顺序布局 -->
+      <div v-else-if="filteredModList.length > 0" class="mod-grid">
         <div v-for="mod in filteredModList" :key="mod.id" class="mod-card-wrapper">
           <t-card class="mod-card" :bordered="false" hover-shadow>
 
@@ -63,10 +76,15 @@
                 <div class="mod-title" :title="mod.modName">{{ mod.modName }}</div>
                 <div class="mod-version">v{{ mod.version }}</div>
               </div>
-              <t-tag :theme="mod.frameworkName === '1' ? 'primary' : 'warning'" variant="light" size="small"
-                v-if="mod.frameworkName">
-                {{ mod.frameworkName === '1' ? 'BepInEx' : 'MelonLoader' }}
-              </t-tag>
+              <div class="mod-tags">
+                <t-tag v-if="mod.isFeatured" theme="danger" variant="light" size="small" class="featured-tag">
+                  推荐
+                </t-tag>
+                <t-tag :theme="mod.frameworkName === '1' ? 'primary' : 'warning'" variant="light" size="small"
+                  v-if="mod.frameworkName">
+                  {{ mod.frameworkName === '1' ? 'BepInEx' : 'MelonLoader' }}
+                </t-tag>
+              </div>
             </div>
 
             <!-- 2. 视频预览 (可选) -->
@@ -165,35 +183,18 @@ import { fetch } from '@tauri-apps/plugin-http';
 import { open } from '@tauri-apps/plugin-dialog';
 // 假设 utils 路径依然有效，请确保这两个函数存在
 import { getModFramework, extractZipToGameDir } from '../utils/modUtils';
-
-// --- 类型定义 ---
-interface ModItem {
-  id: string;
-  modName: string;
-  authorName: string;
-  modDescription: string;
-  videoUrl: string;
-  supportedVersions: string;
-  showDirectUrl: boolean;
-  downloadDirectUrl: string;
-  downloadCloudUrl: string;
-  version: string;
-  updatedAt: string;
-  frameworkName: string;
-}
-
-interface ApiResponse {
-  code: number;
-  msg: string | null;
-  data: ModItem[];
-}
+// 导入全局状态管理
+import { useModListStore, type ModItem } from '../stores/modStore';
 
 // --- 状态变量 ---
-const loading = ref(false);
 const importing = ref(false);
-const modList = ref<ModItem[]>([]);
 const searchText = ref('');
 const filterFramework = ref('all');
+const filterAuthor = ref('all');
+const filterUpdateTime = ref('all');
+
+// 使用全局状态管理
+const { modList, isLoading, fetchModList } = useModListStore();
 
 // 下载状态
 const downloadingId = ref('');
@@ -202,14 +203,59 @@ const installStatus = ref('下载中');
 const abortController = ref<AbortController | null>(null);
 
 // --- 计算属性：筛选逻辑 ---
+// 获取唯一作者列表
+const uniqueAuthors = computed(() => {
+  const authors = new Set(modList.value.map(mod => mod.authorName));
+  return Array.from(authors).sort();
+});
+
+// 筛选后的模组列表
 const filteredModList = computed(() => {
-  return modList.value.filter(mod => {
+  // 先进行筛选
+  const filtered = modList.value.filter(mod => {
     const matchFramework = filterFramework.value === 'all' || mod.frameworkName === filterFramework.value;
+    const matchAuthor = filterAuthor.value === 'all' || mod.authorName === filterAuthor.value;
+    
     const keyword = searchText.value.trim().toLowerCase();
     const matchText = !keyword ||
       mod.modName.toLowerCase().includes(keyword) ||
       mod.authorName.toLowerCase().includes(keyword);
-    return matchFramework && matchText;
+    
+    // 更新时间筛选
+    let matchUpdateTime = true;
+    if (filterUpdateTime.value !== 'all' && mod.updatedAt) {
+      const modDate = new Date(mod.updatedAt);
+      const now = new Date();
+      const diffTime = now.getTime() - modDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      switch (filterUpdateTime.value) {
+        case 'week':
+          matchUpdateTime = diffDays <= 7;
+          break;
+        case 'month':
+          matchUpdateTime = diffDays <= 30;
+          break;
+        case 'quarter':
+          matchUpdateTime = diffDays <= 90;
+          break;
+        case 'year':
+          matchUpdateTime = diffDays <= 365;
+          break;
+      }
+    }
+    
+    return matchFramework && matchAuthor && matchText && matchUpdateTime;
+  });
+  
+  // 然后排序，推荐模组(isFeatured=true)排在最前面
+  return filtered.sort((a, b) => {
+    // 如果a是推荐模组而b不是，a排在前面
+    if (a.isFeatured && !b.isFeatured) return -1;
+    // 如果b是推荐模组而a不是，b排在前面
+    if (!a.isFeatured && b.isFeatured) return 1;
+    // 如果都是推荐模组或都不是推荐模组，保持原有顺序
+    return 0;
   });
 });
 
@@ -220,26 +266,11 @@ const formatDate = (dateStr: string) => dateStr ? dateStr.split(' ')[0] : '';
 
 // 1. 获取列表
 const fetchMods = async () => {
-  loading.value = true;
   try {
-    const response = await fetch('https://mod.ehre.top/api/public/mod', {
-      method: 'GET',
-      headers: { 'User-Agent': 'Tauri-App' }
-    });
-
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const res: ApiResponse = await response.json();
-
-    if (res.code === 0 && res.data) {
-      modList.value = res.data;
-    } else {
-      MessagePlugin.error(res.msg || '获取模组列表失败');
-    }
+    await fetchModList(true); // 强制刷新
   } catch (error) {
     console.error(error);
     MessagePlugin.error('无法连接到模组服务器');
-  } finally {
-    loading.value = false;
   }
 };
 
@@ -366,7 +397,14 @@ const handleCloudLink = (mod: ModItem) => {
 };
 
 // --- 生命周期 ---
-onMounted(fetchMods);
+onMounted(async () => {
+  try {
+    await fetchModList(); // 首次加载，不强制刷新
+  } catch (error) {
+    console.error('首次加载模组列表失败:', error);
+  }
+});
+
 onUnmounted(() => {
   if (abortController.value) abortController.value.abort();
 });
@@ -423,45 +461,41 @@ onUnmounted(() => {
   display: none;
 }
 
-/* --- 瀑布流核心 CSS --- */
-.mod-waterfall {
-  /* 默认 3 列 */
-  column-count: 3;
-  column-gap: 16px;
-  width: 100%;
+/* 左右顺序布局 */
+.mod-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 16px;
 }
 
 .mod-card-wrapper {
-  /* 避免元素在列之间被截断 */
-  break-inside: avoid;
-  margin-bottom: 16px;
-  /* 确保块级格式化上下文 */
-  display: inline-block;
-  width: 100%;
+  /* 不需要特殊样式，网格布局会自动处理 */
 }
 
-/* 响应式调整列数 */
-@media (min-width: 1600px) {
-  .mod-waterfall {
-    column-count: 4;
-  }
-}
-
-@media (max-width: 1200px) {
-  .mod-waterfall {
-    column-count: 3;
-  }
-}
-
-@media (max-width: 900px) {
-  .mod-waterfall {
-    column-count: 2;
-  }
-}
-
+/* 响应式调整 */
 @media (max-width: 600px) {
-  .mod-waterfall {
-    column-count: 1;
+  .mod-grid {
+    grid-template-columns: 1fr;
+    padding: 8px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .mod-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1200px) {
+  .mod-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1201px) {
+  .mod-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -484,6 +518,29 @@ onUnmounted(() => {
   align-items: flex-start;
   padding-bottom: 8px;
   gap: 8px;
+}
+
+.mod-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.featured-tag {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .mod-info-left {

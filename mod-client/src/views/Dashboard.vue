@@ -93,8 +93,13 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { getGamePath, scanLocalMods, getModFramework } from '../utils/modUtils';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { useRouter } from "vue-router";
+// 导入全局状态管理
+import { useModListStore } from '../stores/modStore';
+
 const router = useRouter();
 
+// 使用全局状态管理
+const { modList, fetchModList } = useModListStore();
 
 const loading = ref(false);
 const gamePath = ref('');
@@ -137,16 +142,13 @@ const fetchData = async () => {
     // 3. 获取Mod框架
     modFramework.value = await getModFramework() || '未安装任何框架';
 
-    // 4. 获取在线模组数量 (调用你的API)
-    // 注意：这里为了速度不阻塞UI，可以不 await 或者单独处理错误
-    try {
-      const response = await fetch('https://mod.ehre.top/api/public/mod');
-      const res = await response.json();
-      if (res.code === 0 && res.data) {
-        stats.value.online = res.data.length;
-      }
-    } catch (apiErr) {
-      console.error('获取在线数量失败', apiErr);
+    // 4. 获取在线模组数量（使用全局状态）
+    if (modList.value.length > 0) {
+      stats.value.online = modList.value.length;
+    } else {
+      // 如果全局状态为空，则加载数据
+      await fetchModList();
+      stats.value.online = modList.value.length;
     }
 
     lastUpdateTime.value = new Date().toLocaleString();
@@ -159,11 +161,24 @@ const fetchData = async () => {
   }
 };
 
-const refreshData = () => {
-  fetchData();
+const refreshData = async () => {
+  // 强制刷新在线模组数据
+  await fetchModList(true);
+  stats.value.online = modList.value.length;
+  lastUpdateTime.value = new Date().toLocaleString();
+  MessagePlugin.success('数据已刷新');
 };
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    // 首次加载，不强制刷新
+    await fetchModList();
+    stats.value.online = modList.value.length;
+  } catch (error) {
+    console.error('首次加载模组列表失败:', error);
+  }
+  
+  // 加载其他数据
   fetchData();
 });
 </script>

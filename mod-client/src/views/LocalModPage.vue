@@ -24,7 +24,7 @@
           <t-divider layout="vertical" />
         </div>
 
-        <t-button theme="default" variant="outline" @click="initData" :loading="loading">
+        <t-button theme="default" variant="outline" @click="refreshData" :loading="loading">
           <template #icon>
             <RefreshIcon />
           </template>
@@ -112,6 +112,11 @@ import { join } from '@tauri-apps/api/path';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { fetch } from '@tauri-apps/plugin-http';
 import { scanLocalMods, getPluginsDirectory, type LocalModInfo } from '../utils/modUtils';
+// 导入全局状态管理
+import { useModListStore } from '../stores/modStore';
+
+// 使用全局状态管理
+const { modList: onlineModList, fetchModList } = useModListStore();
 
 interface UIModItem extends LocalModInfo {
   processing: boolean;
@@ -145,15 +150,14 @@ const formatFileName = (fullName: string): string => {
 
 const fetchOnlineData = async () => {
   try {
-    const response = await fetch('https://mod.ehre.top/api/public/mod', {
-      method: 'GET',
-      headers: { 'User-Agent': 'Tauri-App' }
-    });
-    if (!response.ok) return;
-    const json = await response.json();
-    const list: OnlineModItem[] = json.data || [];
+    // 如果全局状态为空，则加载数据
+    if (onlineModList.value.length === 0) {
+      await fetchModList();
+    }
+    
+    // 使用全局状态数据更新本地映射
     onlineModMap.value.clear();
-    list.forEach(item => {
+    onlineModList.value.forEach(item => {
       if (item.englishName && item.modName) {
         onlineModMap.value.set(item.englishName.toLowerCase(), item.modName);
       }
@@ -166,6 +170,14 @@ const fetchOnlineData = async () => {
 const getMatchInfo = (fileName: string): string | undefined => {
   const cleanName = formatFileName(fileName).toLowerCase();
   return onlineModMap.value.get(cleanName);
+};
+
+const refreshData = async () => {
+  // 强制刷新在线模组数据
+  await fetchModList(true);
+  
+  // 重新加载本地模组数据
+  await initData();
 };
 
 const initData = async () => {
@@ -310,7 +322,15 @@ const openFolder = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    // 首次加载，不强制刷新
+    await fetchModList();
+  } catch (error) {
+    console.error('首次加载模组列表失败:', error);
+  }
+  
+  // 加载本地模组数据
   initData();
 });
 </script>
