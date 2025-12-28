@@ -277,7 +277,7 @@ const fetchMods = async () => {
   }
 };
 
-// 2. 手动导入
+// 2. 手动导入（支持批量安装）
 const handleImport = async () => {
   try {
     const store = await load('store.json');
@@ -287,30 +287,64 @@ const handleImport = async () => {
       return;
     }
 
-    const selectedPath = await open({
-      multiple: false,
+    const selectedPaths = await open({
+      multiple: true, // 允许多选
       directory: false,
       filters: [{ name: 'Mod压缩包', extensions: ['zip'] }]
     });
 
-    if (!selectedPath) return;
+    if (!selectedPaths || selectedPaths.length === 0) return;
 
     importing.value = true;
-    const loadingMsg = MessagePlugin.loading('正在安装模组...', 0);
+    const totalFiles = selectedPaths.length;
+    let successCount = 0;
+    let failCount = 0;
 
-    try {
-      const fileData = await readFile(selectedPath as string);
-      await extractZipToGameDir(fileData, gamePath);
+    // 显示批量安装进度
+    const loadingMsg = MessagePlugin.loading(`正在批量安装 ${totalFiles} 个模组... (0/${totalFiles})`, 0);
+
+    // 逐个安装文件
+    for (let i = 0; i < selectedPaths.length; i++) {
+      const filePath = selectedPaths[i];
+      const currentMsg = `正在安装第 ${i + 1} 个模组... (${i}/${totalFiles})`;
       MessagePlugin.close(loadingMsg);
-      NotifyPlugin.success({ title: '手动安装成功', content: '模组已解压至游戏目录' });
-    } catch (err: any) {
-      MessagePlugin.close(loadingMsg);
-      NotifyPlugin.error({ title: '安装失败', content: err.message });
-    } finally {
-      importing.value = false;
+      MessagePlugin.loading(currentMsg, 0);
+
+      try {
+        const fileData = await readFile(filePath as string);
+        await extractZipToGameDir(fileData, gamePath);
+        successCount++;
+      } catch (err: any) {
+        console.error(`安装文件 ${filePath} 失败:`, err);
+        failCount++;
+        // 继续安装下一个文件，不中断整个流程
+      }
     }
+
+    MessagePlugin.close(loadingMsg);
+
+    // 显示安装结果
+    if (failCount === 0) {
+      NotifyPlugin.success({ 
+        title: '批量安装完成', 
+        content: `成功安装 ${successCount} 个模组` 
+      });
+    } else if (successCount === 0) {
+      NotifyPlugin.error({ 
+        title: '批量安装失败', 
+        content: `${failCount} 个模组安装失败` 
+      });
+    } else {
+      NotifyPlugin.warning({ 
+        title: '批量安装完成', 
+        content: `成功: ${successCount} 个，失败: ${failCount} 个` 
+      });
+    }
+
   } catch (err) {
-    console.error(err);
+    console.error('批量安装过程出错:', err);
+    MessagePlugin.error('批量安装过程出错');
+  } finally {
     importing.value = false;
   }
 };

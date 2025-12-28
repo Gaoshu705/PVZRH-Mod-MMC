@@ -8,8 +8,16 @@
         <el-form-item label="Mod英文名" prop="englishName">
           <el-input v-model="form.englishName" placeholder="Mod英文名" />
         </el-form-item>
-        <el-form-item label="作者ID" prop="authorId" v-if="false">
-          <el-input v-model="form.authorId" placeholder="作者ID" />
+        <el-form-item label="作者ID" prop="authorId" v-if="hasPerm('business:mod:sup')">
+          <!-- <el-input v-model="form.authorId" placeholder="作者ID" /> -->
+          <el-select v-model="form.authorId" placeholder="请选择作者" style="width: 240px">
+            <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
+              <div class="option-item">
+                <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
+                <span :style="{ color: item.userId }">{{ item.nickname }}</span>
+              </div>
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="Mod介绍" prop="modDescription">
           <el-input v-model="form.modDescription" placeholder="Mod介绍" />
@@ -50,7 +58,7 @@
         <el-form-item label="是否通过审核" prop="isApproved" v-if="false">
           <el-switch v-model="form.isApproved" :active-value="true" />
         </el-form-item>
-        <el-form-item label="是否推荐" prop="isFeatured" v-if="hasPerm('system:file:upd')">
+        <el-form-item label="是否推荐" prop="isFeatured" v-if="hasPerm('business:mod:sup')">
           <el-switch v-model="form.isFeatured" :active-value="true" />
         </el-form-item>
         <el-form-item label="添加共创" prop="otherAuthor">
