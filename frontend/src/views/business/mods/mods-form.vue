@@ -8,8 +8,16 @@
         <el-form-item label="Mod英文名" prop="englishName">
           <el-input v-model="form.englishName" placeholder="Mod英文名" />
         </el-form-item>
-        <el-form-item label="作者ID" prop="authorId" v-if="false">
-          <el-input v-model="form.authorId" placeholder="作者ID" />
+        <el-form-item label="作者ID" prop="authorId" v-if="hasPerm('business:mod:sup')">
+          <!-- <el-input v-model="form.authorId" placeholder="作者ID" /> -->
+          <el-select v-model="form.authorId" placeholder="请选择作者" style="width: 240px">
+            <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
+              <div class="option-item">
+                <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
+                <span :style="{ color: item.userId }">{{ item.nickname }}</span>
+              </div>
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="Mod介绍" prop="modDescription">
           <el-input v-model="form.modDescription" placeholder="Mod介绍" />
@@ -22,6 +30,9 @@
         </el-form-item>
         <el-form-item label="支持版本" prop="supportedVersions">
           <el-input v-model="form.supportedVersions" placeholder="支持版本" />
+        </el-form-item>
+        <el-form-item label="是否前置" prop="isPreposition" v-if="hasPerm('business:mod:sup')">
+          <el-switch v-model="form.isPreposition" :active-value="true" />
         </el-form-item>
         <el-form-item label="Mod框架" prop="frameworkName">
           <el-select v-model="form.frameworkName" clearable placeholder="Mod框架">
@@ -50,7 +61,7 @@
         <el-form-item label="是否通过审核" prop="isApproved" v-if="false">
           <el-switch v-model="form.isApproved" :active-value="true" />
         </el-form-item>
-        <el-form-item label="是否推荐" prop="isFeatured" v-if="hasPerm('system:file:upd')">
+        <el-form-item label="是否推荐" prop="isFeatured" v-if="hasPerm('business:mod:sup')">
           <el-switch v-model="form.isFeatured" :active-value="true" />
         </el-form-item>
         <el-form-item label="添加共创" prop="otherAuthor">
@@ -162,6 +173,7 @@ const formDefault = {
   modDescription: undefined, // Mod介绍
   gameName: undefined, // 支持游戏
   supportedVersions: undefined, // 支持版本
+  isPreposition: undefined, // 是否前置
   frameworkName: undefined, // Mod框架
   downloadDirectUrl: undefined, // 直链下载地址
   downloadCloudUrl: undefined, // 网盘下载地址

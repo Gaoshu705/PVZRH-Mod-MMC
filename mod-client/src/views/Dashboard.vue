@@ -104,7 +104,7 @@ import { useRouter } from "vue-router";
 // 导入全局状态管理
 import { useModListStore } from '../stores/modStore';
 // 导入更新检查工具
-import { checkForUpdates as checkUpdatesApi, checkUpdatesOnStartup } from '../utils/updateChecker';
+import { checkForUpdates as checkUpdatesApi } from '../utils/updateChecker';
 // 导入Markdown渲染组件
 import MarkdownRenderer from '../components/MarkdownRenderer.vue';
 
@@ -232,8 +232,13 @@ const checkForUpdates = async () => {
 };
 
 onMounted(async () => {
-  // 启动时检查更新
-  checkUpdatesOnStartup();
+  // 启动时检查更新，添加本次启动不再提示逻辑
+  const hasCheckedThisSession = sessionStorage.getItem('hasCheckedUpdateThisSession');
+  
+  if (!hasCheckedThisSession) {
+    checkForUpdates();
+    sessionStorage.setItem('hasCheckedUpdateThisSession', 'true');
+  }
   
   try {
     // 首次加载，不强制刷新

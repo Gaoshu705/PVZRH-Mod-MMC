@@ -10,6 +10,7 @@ export interface ModItem {
   modDescription: string;
   videoUrl: string;
   supportedVersions: string;
+  isPreposition: boolean;
   showDirectUrl: boolean;
   downloadDirectUrl: string;
   downloadCloudUrl: string;

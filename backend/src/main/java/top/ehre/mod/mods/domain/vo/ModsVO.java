@@ -49,6 +49,9 @@ public class ModsVO {
     @ApiModelProperty("支持版本")
     private String supportedVersions;
 
+    @ApiModelProperty("是否前置")
+    private Boolean isPreposition;
+
     @ApiModelProperty("Mod框架")
     private String frameworkName;
 
