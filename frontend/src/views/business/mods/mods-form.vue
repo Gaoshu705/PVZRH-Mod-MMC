@@ -31,6 +31,9 @@
         <el-form-item label="支持版本" prop="supportedVersions">
           <el-input v-model="form.supportedVersions" placeholder="支持版本" />
         </el-form-item>
+        <el-form-item label="是否前置" prop="isPreposition" v-if="hasPerm('business:mod:sup')">
+          <el-switch v-model="form.isPreposition" :active-value="true" />
+        </el-form-item>
         <el-form-item label="Mod框架" prop="frameworkName">
           <el-select v-model="form.frameworkName" clearable placeholder="Mod框架">
             <el-option v-for="(option, index) in frameworkNameOptions" :key="index" :label="option.label"
@@ -170,6 +173,7 @@ const formDefault = {
   modDescription: undefined, // Mod介绍
   gameName: undefined, // 支持游戏
   supportedVersions: undefined, // 支持版本
+  isPreposition: undefined, // 是否前置
   frameworkName: undefined, // Mod框架
   downloadDirectUrl: undefined, // 直链下载地址
   downloadCloudUrl: undefined, // 网盘下载地址

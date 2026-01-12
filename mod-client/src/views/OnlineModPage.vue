@@ -362,12 +362,15 @@ const cancelDownload = () => {
 const handleDownload = async (mod: ModItem) => {
   if (!mod.downloadDirectUrl) return;
 
-  const modFramework = await getModFramework();
-  const fcode = modFramework === 'BepInEx' ? '1' : '2';
+  // 如果是前置模组，跳过环境匹配检查
+  if (!mod.isPreposition) {
+    const modFramework = await getModFramework();
+    const fcode = modFramework === 'BepInEx' ? '1' : '2';
 
-  if (mod.frameworkName !== fcode) {
-    MessagePlugin.warning(`环境不匹配：当前是 ${modFramework}`);
-    return;
+    if (mod.frameworkName !== fcode) {
+      MessagePlugin.warning(`环境不匹配：当前是 ${modFramework}`);
+      return;
+    }
   }
 
   downloadingId.value = mod.id;
