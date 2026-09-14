@@ -7,7 +7,7 @@
     >
       <div class="logo" @click="onGoHome">
         <img class="logo-img" src="/logo.png"/>
-        <div class="title" style="color: black" v-show="!collapse">{{ websiteName }}</div>
+        <div class="title" v-show="!collapse">{{ websiteName }}</div>
       </div>
       <recursiveMenu
           v-for="item in menuData"
@@ -74,21 +74,64 @@ watch(
 <style scoped lang="scss">
 .side-menu {
   height: 100%;
+  background: var(--admin-sidebar-bg);
 
   .logo {
     display: flex;
     align-items: center;
+    height: var(--admin-header-height);
+    padding: 0 14px;
     cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
     .logo-img {
-      height: 30px;
-      width: 30px;
-      margin: 5px 10px 0 10px;
+      height: 32px;
+      width: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .title {
+      margin-left: 10px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
   }
 
   .el-menu {
-    height: 100%;
+    height: calc(100% - var(--admin-header-height));
+    background: var(--admin-sidebar-bg);
+    --el-menu-bg-color: var(--admin-sidebar-bg);
+    --el-menu-hover-bg-color: rgba(255, 255, 255, 0.08);
+    --el-menu-text-color: var(--admin-sidebar-text);
+    --el-menu-active-color: var(--admin-sidebar-active);
+    --el-menu-item-height: 46px;
+    padding: 8px 8px 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+
+    :deep(.el-menu-item),
+    :deep(.el-sub-menu__title) {
+      border-radius: 8px;
+      margin-bottom: 4px;
+    }
+
+    :deep(.el-menu-item.is-active) {
+      background: var(--el-color-primary);
+      color: #fff;
+    }
+
+    :deep(.el-sub-menu .el-menu) {
+      background: transparent;
+    }
+
+    :deep(.el-sub-menu .el-menu-item) {
+      min-width: auto;
+    }
   }
 }
 </style>

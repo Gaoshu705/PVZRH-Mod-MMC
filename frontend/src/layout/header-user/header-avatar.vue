@@ -6,7 +6,7 @@
         :src="avatar"
         :username="username"
         :nickname="nickname"
-        :size="20"
+        :size="28"
       />
       <span class="name">{{ nickname }}</span>
     </div>
@@ -68,7 +68,17 @@ function toAccount(menuId) {
   align-items: center;
 
   .avatar-image {
-    margin-right: 10px;
+    margin-right: 8px;
+  }
+
+  .name {
+    font-size: 13px;
+    color: #334155;
+    font-weight: 500;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>

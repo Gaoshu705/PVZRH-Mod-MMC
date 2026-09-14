@@ -116,16 +116,17 @@ function closeTab(item, closeAll) {
 .page-tab-row {
   display: flex;
   justify-content: space-between;
-  height: 40px;
-  border-bottom: 1px solid rgb(228 231 237);
-  margin-top: 5px;
-  background-color: white;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  align-items: flex-end;
+  min-height: 40px;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0 8px;
+  background: transparent;
+  border-bottom: none;
 
   .page-tab {
     .el-tabs {
-      margin-left: 10px;
+      margin-left: 4px;
     }
 
     max-width: 96%;
@@ -134,8 +135,18 @@ function closeTab(item, closeAll) {
   .tab-action {
     display: flex;
     align-items: center;
-    margin-right: 20px;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0 8px 4px 0;
+    border-radius: 8px;
+    color: #64748b;
     cursor: pointer;
+
+    &:hover {
+      background: #f1f5f9;
+      color: var(--el-color-primary);
+    }
   }
 }
 </style>

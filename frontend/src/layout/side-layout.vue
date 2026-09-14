@@ -1,13 +1,13 @@
 <template>
-  <el-container class="mod-layout" style="height: 100%">
+  <el-container class="mod-layout">
     <el-aside class="mod-layout-aside"
               width="auto">
       <SideMenu :collapse="collapse"/>
     </el-aside>
-    <el-container class="mod-layout-container" :style="`height: ${windowHeight}px`">
+    <el-container class="mod-layout-container">
       <el-header class="mod-layout-header">
-        <el-row class="mod-layout-header-action">
-          <el-col class="mod-layout-header-left" :span="12">
+        <div class="mod-layout-header-action">
+          <div class="mod-layout-header-left">
             <span class="collapse-button">
               <el-icon v-if="collapse" @click="() => (collapse = !collapse)">
                 <expand/>
@@ -26,12 +26,12 @@
             <span class="menu-breadcrumb" v-if="breadCrumbShow">
               <Breadcrumb/>
             </span>
-          </el-col>
+          </div>
           <!---用户区域 -->
-          <el-col class="mod-layout-header-right" :span="12">
+          <div class="mod-layout-header-right">
             <HeaderUser></HeaderUser>
-          </el-col>
-        </el-row>
+          </div>
+        </div>
         <span v-if="pageTagShow"> <PageTab/></span>
       </el-header>
 
@@ -44,14 +44,14 @@
       </el-main>
 
       <el-footer class="mod-layout-footer" v-show="footerShow">
-        <div>Copyright © 2025-2025 Mod后台管理系统</div>
+        <div>Copyright © 2025-2026 模组管理系统</div>
       </el-footer>
     </el-container>
   </el-container>
 </template>
 
 <script setup>
-import {computed, onMounted, ref, watch} from 'vue'
+import {computed, ref} from 'vue'
 import {useAdminConfigStore} from "@/stores/admin-config.js";
 import SideMenu from "@/layout/side-menu/side-menu.vue";
 import {useRoute, useRouter} from "vue-router";
@@ -60,8 +60,6 @@ import PageTab from "@/layout/page-tab/page-tab.vue";
 import Breadcrumb from "@/layout/breadcrumb/breadcrumb.vue";
 import HeaderUser from "@/layout/header-user/header-user.vue";
 
-
-const windowHeight = ref(window.innerHeight)
 
 const collapse = ref(false)
 
@@ -81,68 +79,95 @@ const route = useRoute()
 
 <style lang="scss" scoped>
 .mod-layout {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--admin-bg);
+
   .mod-layout-aside {
-    height: 100vh;
+    height: 100%;
     overflow-x: hidden;
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.08);
+    z-index: 30;
   }
 
   .mod-layout-container {
+    min-width: 0;
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    background: var(--admin-bg);
+
     .mod-layout-header {
-      background: #fff;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
       padding: 0;
       z-index: 21;
       height: auto;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
 
       .mod-layout-header-action {
-        height: 40px;
+        height: var(--admin-header-height);
         display: flex;
         align-items: center;
-        border-bottom: 1px solid #f6f6f6;
+        padding: 0 8px 0 4px;
 
         .mod-layout-header-left {
           display: flex;
           align-items: center;
           flex: 1 1 0;
 
-          .collapse-button {
-            margin-left: 15px;
-            cursor: pointer;
-          }
-
+          .collapse-button,
           .home-button {
-            margin-left: 15px;
+            width: 32px;
+            height: 32px;
+            margin-left: 8px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            padding: 0 5px;
+            color: #475569;
+            transition: background-color 0.2s, color 0.2s;
 
             &:hover {
-              background-color: #efefef;
+              background-color: #f1f5f9;
+              color: var(--el-color-primary);
             }
           }
 
           .menu-breadcrumb {
-            margin-left: 15px;
+            margin-left: 12px;
           }
         }
 
         .mod-layout-header-right {
           display: flex;
           justify-content: flex-end;
+          padding-right: 8px;
         }
       }
     }
 
     .mod-layout-main {
-      padding: 10px;
+      min-width: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 16px 20px;
+      background: var(--admin-bg);
     }
 
     .mod-layout-footer {
       position: relative;
-      padding: 7px 0px;
+      padding: 0;
       display: flex;
       justify-content: center;
-      background-color: white;
+      align-items: center;
+      background-color: transparent;
       height: 40px;
-      border-top: #f0f0f0 1px solid;
+      color: #94a3b8;
+      font-size: 12px;
+      border-top: none;
     }
   }
 }

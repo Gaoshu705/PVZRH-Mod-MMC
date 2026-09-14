@@ -21,5 +21,14 @@ const parentMenuList = computed(() => {
 })
 </script>
 <style scoped lang="scss">
+.breadcrumb {
+  :deep(.el-breadcrumb__inner) {
+    color: #64748b;
+    font-weight: 500;
+  }
 
+  :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+    color: #0f172a;
+  }
+}
 </style>

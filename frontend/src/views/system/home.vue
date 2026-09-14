@@ -3,7 +3,7 @@
     <!-- Welcome Section -->
     <el-row :gutter="20" class="welcome-row">
       <el-col :span="24">
-        <el-card shadow="hover" class="welcome-card">
+        <el-card shadow="never" class="welcome-card">
           <div class="welcome-content">
             <div class="user-avatar">
               <UserAvatar
@@ -15,15 +15,15 @@
             </div>
             <div class="welcome-info">
               <h2 class="greeting">{{ greeting }}，{{ userInfo.nickname }}</h2>
-              <p class="welcome-text">欢迎使用Mod后台管理系统</p>
+              <p class="welcome-text">欢迎回到模组管理系统，今天也一起把内容维护好。</p>
             </div>
             <div class="user-info">
               <div class="info-item">
-                <span class="label">用户名：</span>
+                <span class="label">用户名</span>
                 <span class="value">{{ userInfo.username }}</span>
               </div>
               <div class="info-item">
-                <span class="label">角色：</span>
+                <span class="label">角色</span>
                 <span class="value">{{ userInfo.roles?.join(', ') || '暂无角色' }}</span>
               </div>
             </div>
@@ -35,7 +35,7 @@
     <!-- Statistics Cards -->
     <el-row :gutter="20" class="stats-row" v-if="hasPerm('system:role:get')">
       <el-col :span="6" v-for="(item, index) in statsData" :key="index">
-        <el-card shadow="hover" :body-style="{ padding: '20px' }">
+        <el-card shadow="never" class="stats-wrap" :body-style="{ padding: '18px 20px' }">
           <div class="stats-card">
             <div class="stats-icon" :style="{ background: item.color }">
               <el-icon>
@@ -54,7 +54,7 @@
     <!-- System Info -->
     <el-row :gutter="20" class="system-row">
       <el-col :span="12">
-        <el-card shadow="hover" class="system-card">
+        <el-card shadow="never" class="system-card">
           <template #header>
             <div class="card-header">
               <span>系统信息</span>
@@ -63,7 +63,7 @@
           <div class="system-info">
             <div class="info-item">
               <span class="label">系统名称：</span>
-              <span class="value">Mod后台管理系统</span>
+              <span class="value">模组管理系统</span>
             </div>
             <div class="info-item">
               <span class="label">系统版本：</span>
@@ -84,7 +84,7 @@
         </el-card>
       </el-col>
       <el-col :span="12">
-        <el-card shadow="hover" class="quick-nav-card" v-if="hasPerm('system:role:get')">
+        <el-card shadow="never" class="quick-nav-card" v-if="hasPerm('system:role:get')">
           <template #header>
             <div class="card-header">
               <span>快捷导航</span>
@@ -113,8 +113,8 @@
   import {User, Setting, Menu, Files, Edit, List, Upload} from '@element-plus/icons-vue'
   import {userApi} from '@/api/user-api'
   import {roleApi} from '@/api/role-api'
-  import {menuApi} from '@/api/menu-api'
   import {fileApi} from '@/api/file-api'
+  import {modsApi} from '@/api/mods-api'
   import {useUserStore} from '@/stores/user'
 import {hasPerm} from "@/utils/permission.js";
 import UserAvatar from "@/components/user-avatar.vue";
@@ -147,56 +147,56 @@ import UserAvatar from "@/components/user-avatar.vue";
   // Statistics Data
   const statsData = ref([
     {
+      title: '模组总数',
+      value: '0',
+      icon: 'List',
+      color: 'linear-gradient(135deg, #4f8cff, #2563eb)'
+    },
+    {
       title: '总用户数',
       value: '0',
       icon: 'User',
-      color: '#409EFF'
+      color: 'linear-gradient(135deg, #36cfc9, #0891b2)'
     },
     {
       title: '总角色数',
       value: '0',
       icon: 'Setting',
-      color: '#67C23A'
-    },
-    {
-      title: '总权限数',
-      value: '0',
-      icon: 'Menu',
-      color: '#E6A23C'
+      color: 'linear-gradient(135deg, #73d13d, #16a34a)'
     },
     {
       title: '总文件数',
       value: '0',
       icon: 'Files',
-      color: '#F56C6C'
+      color: 'linear-gradient(135deg, #ff9a43, #f97316)'
     }
   ])
 
   // 快捷导航
   const quickNavs = ref([
     {
+      name: '模组管理',
+      path: '/business/mods',
+      icon: 'List',
+      type: 'primary'
+    },
+    {
       name: '用户管理',
       path: '/system/user',
       icon: 'User',
-      type: 'primary'
+      type: 'success'
     },
     {
       name: '角色管理',
       path: '/system/role',
       icon: 'Setting',
-      type: 'success'
-    },
-    {
-      name: '菜单管理',
-      path: '/system/menu',
-      icon: 'Menu',
       type: 'warning'
     },
     {
       name: '文件管理',
       path: '/system/file',
       icon: 'Files',
-      type: 'danger'
+      type: 'info'
     }
   ])
 
@@ -204,25 +204,21 @@ import UserAvatar from "@/components/user-avatar.vue";
   const fetchStatsData = async () => {
     try {
       // 获取用户总数
-      const userRes = await userApi.page({pageNum: 1, pageSize: 1})
+      const [modsRes, userRes, roleRes, fileRes] = await Promise.all([
+        hasPerm('business:mods:get') ? modsApi.page({pageNum: 1, pageSize: 1}) : Promise.resolve(null),
+        userApi.page({pageNum: 1, pageSize: 1}),
+        roleApi.page({pageNum: 1, pageSize: 1}),
+        fileApi.page({pageNum: 1, pageSize: 1})
+      ])
+      if (modsRes?.data) {
+        statsData.value[0].value = modsRes.data.total.toString()
+      }
       if (userRes?.data) {
-        statsData.value[0].value = userRes.data.total.toString()
+        statsData.value[1].value = userRes.data.total.toString()
       }
-
-      // 获取角色总数
-      const roleRes = await roleApi.page({pageNum: 1, pageSize: 1})
       if (roleRes?.data) {
-        statsData.value[1].value = roleRes.data.total.toString()
+        statsData.value[2].value = roleRes.data.total.toString()
       }
-
-      // 获取权限总数
-      const menuRes = await menuApi.page({pageNum: 1, pageSize: 1})
-      if (menuRes?.data) {
-        statsData.value[2].value = menuRes.data.total.toString()
-      }
-
-      // 获取文件总数
-      const fileRes = await fileApi.page({pageNum: 1, pageSize: 1})
       if (fileRes?.data) {
         statsData.value[3].value = fileRes.data.total.toString()
       }
@@ -245,18 +241,24 @@ import UserAvatar from "@/components/user-avatar.vue";
 
 <style scoped lang="scss">
   .home-container {
-    padding: 20px;
-    background-color: #f0f2f5;
+    padding: 4px 0 8px;
     min-height: 100%;
 
     .welcome-row {
       margin-bottom: 20px;
 
       .welcome-card {
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 48%, #38bdf8 100%);
+        color: #fff;
+
+        :deep(.el-card__body) {
+          padding: 0;
+        }
+
         .welcome-content {
           display: flex;
           align-items: center;
-          padding: 20px;
+          padding: 28px 32px;
 
           .user-avatar {
             margin-right: 24px;
@@ -266,31 +268,42 @@ import UserAvatar from "@/components/user-avatar.vue";
             flex: 1;
 
             .greeting {
-              font-size: 24px;
-              color: #303133;
+              font-size: 26px;
+              color: #fff;
               margin: 0 0 8px 0;
+              font-weight: 700;
             }
 
             .welcome-text {
-              color: #909399;
+              color: rgba(255, 255, 255, 0.82);
               margin: 0;
             }
           }
 
           .user-info {
             margin-left: 40px;
+            min-width: 180px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 12px;
 
             .info-item {
               margin-bottom: 8px;
 
+              &:last-child {
+                margin-bottom: 0;
+              }
+
               .label {
-                color: #909399;
-                margin-right: 8px;
+                display: block;
+                color: rgba(255, 255, 255, 0.7);
+                margin-bottom: 2px;
+                font-size: 12px;
               }
 
               .value {
-                color: #303133;
-                font-weight: 500;
+                color: #fff;
+                font-weight: 600;
               }
             }
           }
@@ -308,7 +321,7 @@ import UserAvatar from "@/components/user-avatar.vue";
         .stats-icon {
           width: 48px;
           height: 48px;
-          border-radius: 8px;
+          border-radius: 14px;
           display: flex;
           align-items: center;
           justify-content: center;

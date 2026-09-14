@@ -33,17 +33,17 @@ watch(themeColor, () => {
 </script>
 <style lang="scss">
 body {
-  background-color: #f0f0f0;
+  background-color: var(--admin-bg, #f3f5f9);
   margin: 0;
 }
 
 .drawer-footer {
   position: relative;
-  margin: -10px -20px;
-  padding: 10px 16px 0 16px;
-  border-top: 1px solid #e9e9e9;
-  text-align: left;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+  margin: 0;
+  padding: 0;
+  border-top: none;
+  text-align: right;
+  box-shadow: none;
 }
 
 /* 全局滚动条的样式 */

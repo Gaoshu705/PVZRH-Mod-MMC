@@ -8,7 +8,13 @@
     <div class="login-box">
       <div class="decoration-circle circle-1"></div>
       <div class="decoration-circle circle-2"></div>
-      <h1 class="title">登录</h1>
+      <div class="brand">
+        <img src="/logo.png" alt="logo" class="brand-logo" />
+        <div>
+          <h1 class="title">模组管理系统</h1>
+          <p class="subtitle">登录后继续管理模组、公告与版本</p>
+        </div>
+      </div>
 
       <el-form :model="form" :rules="rules" ref="formRef" class="login-form">
         <el-form-item prop="username">
@@ -148,7 +154,8 @@ async function onLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(120deg, #1e88e5 0%, #0d47a1 100%);
+  background: radial-gradient(circle at top left, #60a5fa 0%, transparent 32%),
+    linear-gradient(135deg, #0f172a 0%, #1d4ed8 52%, #0ea5e9 100%);
   position: relative;
   overflow: hidden;
 }
@@ -260,15 +267,29 @@ async function onLogin() {
 }
 
 .login-box {
-  width: 400px;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 420px;
+  padding: 36px 32px 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
   position: relative;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   overflow: hidden;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 .decoration-circle {
@@ -293,10 +314,17 @@ async function onLogin() {
 }
 
 .title {
-  text-align: center;
-  color: #2c3e50;
-  font-size: 28px;
-  margin-bottom: 30px;
+  text-align: left;
+  color: #0f172a;
+  font-size: 22px;
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
 }
 
 .login-form {

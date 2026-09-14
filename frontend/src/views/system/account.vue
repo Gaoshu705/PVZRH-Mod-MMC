@@ -1,6 +1,9 @@
 <template>
-  <el-card style="width: 100%;height: 100%">
-    <div class="account-content" style="width: 60%">
+  <el-card class="account-card" shadow="never">
+    <template #header>
+      <div class="account-header">个人中心</div>
+    </template>
+    <div class="account-content">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="用户ID" prop="userId">
           <el-input v-model="form.userId" placeholder="用户ID" disabled/>
@@ -155,10 +158,16 @@ async function save() {
 
 </script>
 <style lang="scss" scoped>
+.account-card {
+  max-width: 760px;
+}
+
+.account-header {
+  font-weight: 600;
+}
+
 .account-content {
-  align-items: center;
-  flex-direction: column;
-  justify-items: center;
+  max-width: 520px;
 }
 
 

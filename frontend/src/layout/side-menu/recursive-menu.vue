@@ -37,8 +37,12 @@ function turnToPage(menu) {
 
 <style lang="scss" scoped>
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   margin-right: 10px;
+}
+
+.title {
+  font-size: 14px;
 }
 </style>

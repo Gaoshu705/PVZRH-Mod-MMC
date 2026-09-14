@@ -9,7 +9,13 @@
       <div class="decoration-circle circle-1"></div>
       <div class="decoration-circle circle-2"></div>
       <div class="decoration-circle circle-3"></div>
-      <h1 class="title">注册账号</h1>
+      <div class="brand">
+        <img src="/logo.png" alt="logo" class="brand-logo" />
+        <div>
+          <h1 class="title">创建账号</h1>
+          <p class="subtitle">注册后即可使用模组管理系统</p>
+        </div>
+      </div>
 
       <el-form ref="formRef" :model="formData" :rules="rules" class="register-form">
         <el-form-item prop="username" class="custom-form-item">
@@ -154,7 +160,8 @@ async function register() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(120deg, #2196f3 0%, #1565c0 100%);
+  background: radial-gradient(circle at top left, #60a5fa 0%, transparent 32%),
+    linear-gradient(135deg, #0f172a 0%, #1d4ed8 52%, #0ea5e9 100%);
   position: relative;
   overflow: hidden;
 }
@@ -267,14 +274,28 @@ async function register() {
 
 .register-box {
   width: 440px;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 36px 32px 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
   position: relative;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   overflow: hidden;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 .decoration-circle {
@@ -308,10 +329,17 @@ async function register() {
 }
 
 .title {
-  text-align: center;
-  color: #2c3e50;
-  font-size: 28px;
-  margin-bottom: 30px;
+  text-align: left;
+  color: #0f172a;
+  font-size: 22px;
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
 }
 
 .register-form {

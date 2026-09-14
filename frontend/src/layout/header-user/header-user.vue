@@ -32,8 +32,28 @@ function showSetting() {
 
 <style lang="scss" scoped>
 .setting {
-  // display: flex;
-  // align-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
   cursor: pointer;
+
+  &:hover {
+    background: #f1f5f9;
+    color: var(--el-color-primary);
+  }
+}
+
+.user-space-item {
+  padding: 4px 8px 4px 4px;
+  border-radius: 999px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: #f1f5f9;
+  }
 }
 </style>

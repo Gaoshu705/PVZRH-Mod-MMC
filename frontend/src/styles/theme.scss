@@ -1,0 +1,116 @@
+:root {
+  --admin-bg: #f3f5f9;
+  --admin-sidebar-bg: #0f172a;
+  --admin-sidebar-text: rgba(255, 255, 255, 0.72);
+  --admin-sidebar-active: #ffffff;
+  --admin-header-height: 56px;
+  --admin-radius: 12px;
+  --admin-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--admin-bg);
+  color: #1f2937;
+  font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.el-card {
+  border: none;
+  border-radius: var(--admin-radius);
+  box-shadow: var(--admin-shadow);
+  overflow: hidden;
+}
+
+.el-card__header {
+  padding: 14px 20px;
+  border-bottom: 1px solid #eef2f7;
+  font-weight: 600;
+}
+
+.el-card__body {
+  padding: 16px 20px;
+}
+
+.el-table {
+  --el-table-header-bg-color: #f8fafc;
+  --el-table-header-text-color: #475569;
+  --el-table-row-hover-bg-color: #f8fbff;
+  width: 100%;
+}
+
+.el-table th.el-table__cell {
+  font-weight: 600;
+}
+
+.el-button {
+  border-radius: 8px;
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
+  border-radius: 8px;
+}
+
+.el-pagination {
+  --el-pagination-button-width: 32px;
+  --el-pagination-button-height: 32px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.el-drawer__header {
+  margin-bottom: 8px;
+  padding: 16px 20px 12px;
+  font-weight: 600;
+}
+
+.el-drawer__footer {
+  padding: 12px 20px 16px;
+  border-top: 1px solid #eef2f7;
+}
+
+.drawer-footer {
+  margin: 0;
+  padding: 0;
+  border-top: none;
+  box-shadow: none;
+  text-align: right;
+}
+
+.el-menu {
+  border-right: none;
+}
+
+.page-tab-row .el-tabs__header {
+  margin: 0;
+  border: none;
+}
+
+.page-tab-row .el-tabs--card > .el-tabs__header .el-tabs__nav {
+  border: none;
+}
+
+.page-tab-row .el-tabs--card > .el-tabs__header .el-tabs__item {
+  border: none;
+  border-radius: 8px 8px 0 0;
+  height: 36px;
+  line-height: 36px;
+  color: #64748b;
+}
+
+.page-tab-row .el-tabs--card > .el-tabs__header .el-tabs__item.is-active {
+  background: #f8fafc;
+  color: var(--el-color-primary);
+  font-weight: 600;
+}

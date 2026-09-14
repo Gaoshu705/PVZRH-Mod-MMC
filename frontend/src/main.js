@@ -11,6 +11,7 @@ import {ElMessage} from "element-plus";
 import {localRead} from "@/utils/local-util.js";
 import {loginApi} from "@/api/login-api.js";
 import '@/styles/common.scss'
+import '@/styles/theme.scss'
 
 export async function getUserInfo() {
   try {
