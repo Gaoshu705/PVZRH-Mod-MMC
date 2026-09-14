@@ -6,9 +6,12 @@
         <el-card shadow="hover" class="welcome-card">
           <div class="welcome-content">
             <div class="user-avatar">
-              <el-avatar :size="64" :src="userInfo.avatar">
-                {{ userInfo.nickname?.charAt(0) }}
-              </el-avatar>
+              <UserAvatar
+                :size="64"
+                :src="userInfo.avatar"
+                :username="userInfo.username"
+                :nickname="userInfo.nickname"
+              />
             </div>
             <div class="welcome-info">
               <h2 class="greeting">{{ greeting }}，{{ userInfo.nickname }}</h2>
@@ -114,6 +117,7 @@
   import {fileApi} from '@/api/file-api'
   import {useUserStore} from '@/stores/user'
 import {hasPerm} from "@/utils/permission.js";
+import UserAvatar from "@/components/user-avatar.vue";
   const router = useRouter()
   const userStore = useUserStore()
 

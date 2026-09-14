@@ -11,6 +11,7 @@ export interface ModItem {
   videoUrl: string;
   supportedVersions: string;
   isPreposition: boolean;
+  isModpack: boolean;
   showDirectUrl: boolean;
   downloadDirectUrl: string;
   downloadCloudUrl: string;

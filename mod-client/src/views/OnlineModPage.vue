@@ -87,6 +87,9 @@
                   v-if="mod.frameworkName">
                   {{ mod.frameworkName === '1' ? 'BepInEx' : 'MelonLoader' }}
                 </t-tag>
+                <t-tag v-if="mod.isModpack" theme="success" variant="light" size="small">
+                  整合包
+                </t-tag>
               </div>
             </div>
 

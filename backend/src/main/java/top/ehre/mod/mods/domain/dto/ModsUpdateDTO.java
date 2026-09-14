@@ -49,6 +49,9 @@ public class ModsUpdateDTO {
     @ApiModelProperty("是否前置")
     private Boolean isPreposition;
 
+    @ApiModelProperty("是否整合包")
+    private Boolean isModpack;
+
     @ApiModelProperty("Mod框架")
     private String frameworkName;
 

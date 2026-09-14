@@ -1,10 +1,13 @@
 <template>
   <el-dropdown class="header-trigger">
     <div class="wrapper">
-      <img class="avatar-image" :src="avatar" v-if="avatar"/>
-      <el-avatar v-else :size="20" class="avatar">
-        user
-      </el-avatar>
+      <UserAvatar
+        class="avatar-image"
+        :src="avatar"
+        :username="username"
+        :nickname="nickname"
+        :size="20"
+      />
       <span class="name">{{ nickname }}</span>
     </div>
     <template #dropdown>
@@ -20,13 +23,15 @@
   </el-dropdown>
 </template>
 <script setup>
-import {ref, reactive, computed} from 'vue'
+import {computed} from 'vue'
 import {loginApi} from "@/api/login-api.js";
 import {useUserStore} from "@/stores/user.js";
 import {useMenuStore} from "@/stores/menu.js";
 import {useRouter} from "vue-router";
+import UserAvatar from "@/components/user-avatar.vue";
 
 const userStore = useUserStore()
+const username = computed(() => userStore.username)
 const nickname = computed(() => userStore.nickname)
 const avatar = computed(() => userStore.avatar)
 
@@ -63,10 +68,6 @@ function toAccount(menuId) {
   align-items: center;
 
   .avatar-image {
-    width: 20px;
-    height: 20px;
-    object-fit: cover;
-    border-radius: 50%;
     margin-right: 10px;
   }
 }

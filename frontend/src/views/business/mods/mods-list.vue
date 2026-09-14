@@ -110,6 +110,11 @@
               <el-tag :type="scope.row.isVisible ? 'success' : 'danger'">{{ scope.row.isVisible ? '是' : '否' }}</el-tag>
             </template>
           </el-table-column>
+          <el-table-column prop="isModpack" label="是否整合包" min-width="120" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.isModpack ? 'success' : 'info'">{{ scope.row.isModpack ? '是' : '否' }}</el-tag>
+            </template>
+          </el-table-column>
 
           <el-table-column prop="supportedVersions" label="支持版本" min-width="120" align="center"/>
           <el-table-column prop="frameworkName" label="Mod框架" min-width="120" align="center">
@@ -318,6 +323,7 @@ const sortItemOptions = ref([
   {label: '是否通过审核', column: 'is_approved', isAsc: false},
   {label: '是否推荐', column: 'is_featured', isAsc: false},
   {label: '是否可见', column: 'is_visible', isAsc: false},
+  {label: '是否整合包', column: 'is_modpack', isAsc: false},
   {label: '创建时间', column: 'created_at', isAsc: false},
   {label: '修改时间', column: 'updated_at', isAsc: false},
 ])

@@ -14,6 +14,7 @@ CREATE TABLE mods (
     download_count INT DEFAULT 0 COMMENT '下载次数',
     view_count INT DEFAULT 0 COMMENT '查看次数',
     is_approved BOOLEAN DEFAULT FALSE COMMENT '是否通过审核',
+    is_modpack BOOLEAN DEFAULT FALSE COMMENT '是否整合包',
     is_featured BOOLEAN DEFAULT FALSE COMMENT '是否推荐',
     is_visible BOOLEAN DEFAULT TRUE COMMENT '是否可见',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -26,3 +27,6 @@ CREATE TABLE mods (
     INDEX idx_visible (is_visible),
     INDEX idx_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 已有数据库执行：
+-- ALTER TABLE mods ADD COLUMN is_modpack BOOLEAN DEFAULT FALSE COMMENT '是否整合包';

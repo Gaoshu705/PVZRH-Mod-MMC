@@ -116,7 +116,7 @@
                 <el-image
                     style="width: 95px; height: 95px"
                     :src="scope.row.avatar"
-                    :preview-src-list="[scope.row.avatar]"
+                    :preview-src-list="scope.row.avatar ? [scope.row.avatar] : []"
                     :zoom-rate="1.2"
                     :max-scale="7"
                     :min-scale="0.2"
@@ -124,7 +124,13 @@
                     :z-index="1000"
                     :preview-teleported="true"
                     fit="scale-down"
-                />
+                >
+                  <template #error>
+                    <div class="avatar-fallback">
+                      {{ getAvatarFallbackChar(scope.row.username, scope.row.nickname) }}
+                    </div>
+                  </template>
+                </el-image>
               </template>
             </el-table-column>
             <el-table-column label="角色列表" min-width="120">
@@ -189,6 +195,7 @@
   import UserForm from './user-form.vue'
   import {Delete, Plus, Refresh, Search, ArrowUp, ArrowDown} from '@element-plus/icons-vue'
   import {hasPerm} from "@/utils/permission.js";
+  import { getAvatarFallbackChar } from '@/utils/avatar.js'
   // ------------------------ 导入列表 ------------------------
   import RoleVoList from "./role-vo-list.vue";
   // --------------------------------------------------------
@@ -363,4 +370,15 @@
   // --------------------------------------------------------
 </script>
 <style scoped lang="scss">
+.avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--el-color-primary-light-8);
+  color: var(--el-color-primary);
+  font-size: 36px;
+  font-weight: 600;
+}
 </style>

@@ -27,7 +27,14 @@
               :http-request="doAvatarUpload"
               class="mod-image-uploader"
           >
-            <img v-if="form.avatar" :src="form.avatar" class="mod-img"/>
+            <UserAvatar
+              v-if="form.avatar"
+              :src="form.avatar"
+              :username="form.username"
+              :nickname="form.nickname"
+              :size="178"
+              shape="square"
+            />
             <el-icon v-else class="mod-image-uploader-icon">
               <Plus/>
             </el-icon>
@@ -51,6 +58,7 @@ import {ElMessage} from 'element-plus'
 import {userApi} from '@/api/user-api'
 import {useUserStore} from '@/stores/user.js'
 import {fileApi} from "@/api/file-api.js";
+import UserAvatar from "@/components/user-avatar.vue";
 
 const genderOptions = [
   {label: '未知', value: 0},

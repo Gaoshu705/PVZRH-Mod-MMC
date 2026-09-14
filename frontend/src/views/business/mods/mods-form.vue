@@ -26,7 +26,7 @@
               <el-select v-model="form.authorId" placeholder="请选择作者" filterable style="width: 100%">
                 <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
                   <div class="option-item">
-                    <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
+                    <UserAvatar :src="item.avatar" :username="item.username" :nickname="item.nickname" :size="24" style="margin-right: 8px;" />
                     <span>{{ item.nickname }}</span>
                   </div>
                 </el-option>
@@ -38,7 +38,7 @@
               <el-select v-model="form.otherAuthors" multiple placeholder="请选择共创作者" filterable style="width: 100%">
                 <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
                   <div class="option-item">
-                    <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
+                    <UserAvatar :src="item.avatar" :username="item.username" :nickname="item.nickname" :size="24" style="margin-right: 8px;" />
                     <span>{{ item.nickname }}</span>
                   </div>
                 </el-option>
@@ -119,6 +119,11 @@
               <el-switch v-model="form.isVisible" :active-value="true" />
             </el-form-item>
           </el-col>
+          <el-col :span="8">
+            <el-form-item label="是否整合包" prop="isModpack">
+              <el-switch v-model="form.isModpack" :active-value="true" />
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
 
@@ -141,6 +146,7 @@ import { modsApi } from '@/api/mods-api';
 import { userApi } from '@/api/user-api';
 import { fileApi } from '@/api/file-api.js';
 import { hasPerm } from "@/utils/permission.js";
+import UserAvatar from "@/components/user-avatar.vue";
 
 const frameworkNameOptions = [
   { label: 'Bepinex', value: '1' },
@@ -164,6 +170,7 @@ function show(rowData) {
   }
   form.modDescription = form.modDescription || '';
   form.otherAuthors = form.otherAuthors || [];
+  form.isModpack = !!form.isModpack;
   visibleFlag.value = true;
   addFlag.value = rowData.id == null;
   nextTick(() => {
@@ -220,6 +227,7 @@ const formDefault = {
   isApproved: undefined,
   isFeatured: undefined,
   isVisible: undefined,
+  isModpack: false,
   createdAt: undefined,
   updatedAt: undefined,
 };

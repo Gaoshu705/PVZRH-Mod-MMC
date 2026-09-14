@@ -29,7 +29,14 @@
               :http-request="doAvatarUpload"
               class="mod-image-uploader"
           >
-            <img v-if="form.avatar" :src="form.avatar" class="mod-img" />
+            <UserAvatar
+              v-if="form.avatar"
+              :src="form.avatar"
+              :username="form.username"
+              :nickname="form.nickname"
+              :size="178"
+              shape="square"
+            />
             <el-icon v-else class="mod-image-uploader-icon">
               <Plus />
             </el-icon>
@@ -93,6 +100,7 @@
   import _ from 'lodash';
   import {ElMessage} from 'element-plus';
   import {userApi} from '@/api/user-api';
+  import UserAvatar from "@/components/user-avatar.vue";
   // ------------------------ 联表查询VO ------------------------
   const queryFormState = {
     pageNum: 1,
