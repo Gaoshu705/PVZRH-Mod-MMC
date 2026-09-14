@@ -116,8 +116,21 @@
               <span v-else style="color: var(--el-text-color-placeholder)">无</span>
             </template>
           </el-table-column>
-          <el-table-column prop="modName" label="Mod名称" min-width="120" align="center"/>
-          <el-table-column prop="modDescription" label="Mod介绍" min-width="120" align="center"/>
+          <el-table-column prop="modName" label="Mod名称" min-width="120" align="center" show-overflow-tooltip/>
+          <el-table-column prop="modDescription" label="Mod介绍" min-width="200" align="left">
+            <template #default="scope">
+              <el-tooltip
+                :content="getDescriptionTooltip(scope.row.modDescription)"
+                placement="top"
+                :disabled="!getDescriptionPreview(scope.row.modDescription)"
+                :show-after="300"
+              >
+                <div class="mod-desc-cell">
+                  {{ getDescriptionPreview(scope.row.modDescription) || '暂无介绍' }}
+                </div>
+              </el-tooltip>
+            </template>
+          </el-table-column>
           <el-table-column prop="isVisible" label="是否发布" min-width="120" align="center">
             <template #default="scope">
               <el-tag :type="scope.row.isVisible ? 'success' : 'danger'">{{ scope.row.isVisible ? '是' : '否' }}</el-tag>
@@ -201,6 +214,23 @@ const frameworkNameOptions = [
 function getFrameworkNameOptionsLabel(value) {
   const option = frameworkNameOptions.find(option => option.value === value)
   return option ? option.label : ''
+}
+
+function getDescriptionPreview(text) {
+  if (!text) return ''
+  return String(text)
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#>*_`~-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function getDescriptionTooltip(text) {
+  const preview = getDescriptionPreview(text)
+  if (preview.length <= 180) return preview
+  return `${preview.slice(0, 180)}...`
 }
 
 
@@ -372,4 +402,17 @@ watch(selectedSortItems, (newSelectedSortItems, oldSelectedSortItems) => {
 // --------------------------------------------------------
 </script>
 <style scoped lang="scss">
+.mod-desc-cell {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  max-height: 2.8em;
+  word-break: break-all;
+  white-space: normal;
+  text-align: left;
+  cursor: default;
+}
 </style>
