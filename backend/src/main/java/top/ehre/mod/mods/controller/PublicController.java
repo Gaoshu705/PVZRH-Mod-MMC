@@ -3,6 +3,8 @@ package top.ehre.mod.mods.controller;
 import jakarta.annotation.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import top.ehre.mod.announcement.service.AnnouncementService;
+import top.ehre.mod.announcement.domain.vo.AnnouncementVO;
 import top.ehre.mod.clientVersion.service.ClientVersionService;
 import top.ehre.mod.mods.domain.dto.ModsPageDTO;
 import top.ehre.mod.mods.domain.vo.ModsVO;
@@ -27,6 +29,9 @@ public class PublicController {
     @Resource
     private ClientVersionService clientVersionService;
 
+    @Resource
+    private AnnouncementService announcementService;
+
     @GetMapping("/mod")
     public Result modList() {
         return Result.success(modsService.getList());
@@ -47,5 +52,10 @@ public class PublicController {
     @GetMapping("/getPublishVersion")
     public Result getPublishVersion() {
         return Result.success(clientVersionService.getPublicVersion());
+    }
+
+    @GetMapping("/announcements")
+    public Result getPublishedAnnouncements() {
+        return Result.success(announcementService.getPublishedAnnouncements());
     }
 }

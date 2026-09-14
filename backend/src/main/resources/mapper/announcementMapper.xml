@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.ehre.mod.announcement.mapper.AnnouncementMapper">
+
+    <select id="getPublishedAnnouncements" resultType="top.ehre.mod.announcement.domain.entity.AnnouncementEntity">
+        SELECT * FROM announcement WHERE is_published = 1 ORDER BY created_time DESC
+    </select>
+</mapper>
