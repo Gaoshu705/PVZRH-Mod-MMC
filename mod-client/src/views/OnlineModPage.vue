@@ -67,14 +67,17 @@
 
       <!-- 左右顺序布局 -->
       <div v-else-if="filteredModList.length > 0" class="mod-grid">
-        <div v-for="mod in filteredModList" :key="mod.id" class="mod-card-wrapper">
+        <div v-for="mod in filteredModList" :key="mod.id" class="mod-card-wrapper" @mouseenter="trackModView(mod.id)">
           <t-card class="mod-card" :bordered="false" hover-shadow>
 
             <!-- 1. 卡片头部 -->
             <div class="mod-card-header">
               <div class="mod-info-left">
-                <div class="mod-title" :title="mod.modName">{{ mod.modName }}</div>
-                <div class="mod-version">v{{ mod.version }}</div>
+                <img v-if="mod.iconUrl" :src="mod.iconUrl" class="mod-icon" alt="" />
+                <div class="mod-title-wrap">
+                  <div class="mod-title" :title="mod.modName">{{ mod.modName }}</div>
+                  <div class="mod-version">v{{ mod.version }}</div>
+                </div>
               </div>
               <div class="mod-tags">
                 <t-tag v-if="mod.isFeatured" theme="danger" variant="light" size="small" class="featured-tag">
@@ -115,6 +118,16 @@
                   <div class="meta-item date">
                     <TimeIcon size="14px" />
                     <span>{{ formatDate(mod.updatedAt) }}</span>
+                  </div>
+                </div>
+                <div class="meta-row stats-row">
+                  <div class="meta-item">
+                    <BrowseIcon size="14px" />
+                    <span>{{ formatCount(mod.viewCount) }} 浏览</span>
+                  </div>
+                  <div class="meta-item">
+                    <DownloadIcon size="14px" />
+                    <span>{{ formatCount(mod.downloadCount) }} 下载</span>
                   </div>
                 </div>
 
@@ -181,7 +194,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { MessagePlugin, NotifyPlugin } from 'tdesign-vue-next';
-import { RefreshIcon, DownloadIcon, CloudDownloadIcon, UserIcon, TimeIcon, FileImportIcon, SearchIcon,PumpkinIcon } from 'tdesign-icons-vue-next';
+import { RefreshIcon, DownloadIcon, CloudDownloadIcon, UserIcon, TimeIcon, FileImportIcon, SearchIcon, PumpkinIcon, BrowseIcon } from 'tdesign-icons-vue-next';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { load } from '@tauri-apps/plugin-store';
 import { readFile } from '@tauri-apps/plugin-fs';
@@ -190,7 +203,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 // 假设 utils 路径依然有效，请确保这两个函数存在
 import { getModFramework, extractZipToGameDir } from '../utils/modUtils';
 // 导入全局状态管理
-import { useModListStore, type ModItem } from '../stores/modStore';
+import { useModListStore, reportModView, reportModDownload, type ModItem } from '../stores/modStore';
 
 // --- 状态变量 ---
 const importing = ref(false);
@@ -267,6 +280,17 @@ const filteredModList = computed(() => {
 
 // --- 工具函数 ---
 const formatDate = (dateStr: string) => dateStr ? dateStr.split(' ')[0] : '';
+const formatCount = (value: string | number | undefined) => {
+  const count = Number(value || 0);
+  return Number.isFinite(count) ? String(count) : '0';
+};
+
+const viewedModIds = new Set<string>();
+const trackModView = (id: string) => {
+  if (!id || viewedModIds.has(id)) return;
+  viewedModIds.add(id);
+  reportModView(id);
+};
 
 // --- 核心业务逻辑 ---
 
@@ -421,6 +445,7 @@ const handleDownload = async (mod: ModItem) => {
     await extractZipToGameDir(allChunks, gamePath);
 
     downloadProgress.value = 100;
+    reportModDownload(mod.id);
     NotifyPlugin.success({ title: '安装成功', content: `${mod.modName} 已就绪` });
 
   } catch (err: any) {
@@ -436,7 +461,9 @@ const handleDownload = async (mod: ModItem) => {
 };
 
 const handleCloudLink = (mod: ModItem) => {
-  if (mod.downloadCloudUrl) openUrl(mod.downloadCloudUrl);
+  if (!mod.downloadCloudUrl) return;
+  reportModDownload(mod.id);
+  openUrl(mod.downloadCloudUrl);
 };
 
 // --- 生命周期 ---
@@ -608,6 +635,23 @@ onUnmounted(() => {
 .mod-info-left {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mod-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--td-bg-color-component);
+}
+
+.mod-title-wrap {
+  min-width: 0;
+  flex: 1;
 }
 
 .mod-title {
@@ -670,6 +714,10 @@ onUnmounted(() => {
 .meta-row {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.stats-row {
   margin-bottom: 8px;
 }
 

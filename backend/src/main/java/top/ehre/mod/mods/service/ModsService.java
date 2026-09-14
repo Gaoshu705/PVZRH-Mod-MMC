@@ -4,6 +4,7 @@ import top.ehre.mod.mods.domain.entity.ModsEntity;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.ehre.mod.mods.domain.vo.ModsVO;
+import top.ehre.mod.mods.domain.vo.ModsCountVO;
 import top.ehre.mod.mods.domain.dto.ModsPageDTO;
 import top.ehre.mod.mods.domain.dto.ModsAddDTO;
 import top.ehre.mod.mods.domain.dto.ModsUpdateDTO;
@@ -35,4 +36,8 @@ public interface ModsService extends IService<ModsEntity> {
     ModsVO get(String id);
 
     int addOtherAuthor(String id, String authorId);
+
+    ModsCountVO incrementDownloadCount(String id);
+
+    ModsCountVO incrementViewCount(String id);
 }

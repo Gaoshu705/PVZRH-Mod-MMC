@@ -4,6 +4,7 @@ CREATE TABLE mods (
     english_name VARCHAR(100) COMMENT 'Mod英文名',
     author_id INT COMMENT '作者ID',
     mod_description TEXT COMMENT 'Mod介绍',
+    icon_url VARCHAR(500) COMMENT '模组图标',
     game_name VARCHAR(100) COMMENT '支持游戏',
     supported_versions VARCHAR(100) COMMENT '支持版本',
     framework_name VARCHAR(100) COMMENT 'Mod框架',
@@ -30,3 +31,4 @@ CREATE TABLE mods (
 
 -- 已有数据库执行：
 -- ALTER TABLE mods ADD COLUMN is_modpack BOOLEAN DEFAULT FALSE COMMENT '是否整合包';
+-- ALTER TABLE mods ADD COLUMN icon_url VARCHAR(500) COMMENT '模组图标';

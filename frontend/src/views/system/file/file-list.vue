@@ -157,6 +157,7 @@
   const folderTypeOptions = [
     { label: '头像', value: 1 },
     { label: '其他', value: 2 },
+    { label: '模组图标', value: 3 },
   ]
   function getFolderTypeOptionsLabel(value) {
     const option = folderTypeOptions.find(option => option.value === value)

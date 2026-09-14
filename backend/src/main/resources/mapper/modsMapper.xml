@@ -10,4 +10,16 @@
     <select id="getOtherAuthors" resultType="java.lang.String">
         select author_id from mods_other_author where mod_id = #{id}
     </select>
+    <update id="incrementDownloadCount">
+        UPDATE mods
+        SET download_count = IFNULL(download_count, 0) + 1,
+            updated_at = updated_at
+        WHERE id = #{id}
+    </update>
+    <update id="incrementViewCount">
+        UPDATE mods
+        SET view_count = IFNULL(view_count, 0) + 1,
+            updated_at = updated_at
+        WHERE id = #{id}
+    </update>
 </mapper>

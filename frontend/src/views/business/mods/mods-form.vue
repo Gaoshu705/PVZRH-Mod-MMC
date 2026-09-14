@@ -69,6 +69,11 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
+            <el-form-item label="模组图标" prop="iconUrl">
+              <ModIconUpload v-model="form.iconUrl" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
             <el-form-item label="视频Url" prop="videoUrl">
               <el-input v-model="form.videoUrl" placeholder="视频地址，选填" />
             </el-form-item>
@@ -147,6 +152,7 @@ import { userApi } from '@/api/user-api';
 import { fileApi } from '@/api/file-api.js';
 import { hasPerm } from "@/utils/permission.js";
 import UserAvatar from "@/components/user-avatar.vue";
+import ModIconUpload from "@/components/mod-icon-upload.vue";
 
 const frameworkNameOptions = [
   { label: 'Bepinex', value: '1' },
@@ -211,6 +217,7 @@ const formDefault = {
   englishName: undefined,
   authorId: undefined,
   modDescription: '',
+  iconUrl: undefined,
   videoUrl: undefined,
   gameName: undefined,
   supportedVersions: undefined,

@@ -11,7 +11,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum FolderTypeEnum {
     AVATAR((byte) 1, "avatar"),
-    COMMON((byte) 2, "common");
+    COMMON((byte) 2, "common"),
+    MOD_ICON((byte) 3, "mod-icon");
 
     private final Byte value;
 

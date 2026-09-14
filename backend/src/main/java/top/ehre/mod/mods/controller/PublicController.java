@@ -49,6 +49,16 @@ public class PublicController {
         return Result.success(modsVO);
     }
 
+    @PostMapping("/mod/{id}/view")
+    public Result incrementView(@PathVariable("id") String id) {
+        return Result.success(modsService.incrementViewCount(id));
+    }
+
+    @PostMapping("/mod/{id}/download")
+    public Result incrementDownload(@PathVariable("id") String id) {
+        return Result.success(modsService.incrementDownloadCount(id));
+    }
+
     @GetMapping("/getPublishVersion")
     public Result getPublishVersion() {
         return Result.success(clientVersionService.getPublicVersion());

@@ -1,6 +1,8 @@
 import { ref } from 'vue';
 import { fetch } from '@tauri-apps/plugin-http';
 
+const PUBLIC_API = 'https://mod.ehre.top/api/public';
+
 // 模组接口类型定义
 export interface ModItem {
   id: string;
@@ -8,6 +10,7 @@ export interface ModItem {
   englishName: string;
   authorName: string;
   modDescription: string;
+  iconUrl: string;
   videoUrl: string;
   supportedVersions: string;
   isPreposition: boolean;
@@ -19,6 +22,8 @@ export interface ModItem {
   updatedAt: string;
   frameworkName: string;
   isFeatured: boolean; // 是否为推荐模组
+  downloadCount: string | number;
+  viewCount: string | number;
 }
 
 export interface ApiResponse {
@@ -44,7 +49,7 @@ export async function fetchModList(forceRefresh = false) {
   error.value = null;
 
   try {
-    const response = await fetch('https://mod.ehre.top/api/public/mod', {
+    const response = await fetch(`${PUBLIC_API}/mod`, {
       method: 'GET',
       headers: { 'User-Agent': 'Tauri-App' }
     });
@@ -67,6 +72,49 @@ export async function fetchModList(forceRefresh = false) {
   }
 }
 
+function applyCount(id: string, downloadCount?: string | number, viewCount?: string | number) {
+  const item = modList.value.find(mod => mod.id === id);
+  if (!item) return;
+  if (downloadCount !== undefined && downloadCount !== null) {
+    item.downloadCount = downloadCount;
+  }
+  if (viewCount !== undefined && viewCount !== null) {
+    item.viewCount = viewCount;
+  }
+}
+
+export async function reportModView(id: string) {
+  try {
+    const response = await fetch(`${PUBLIC_API}/mod/${id}/view`, {
+      method: 'POST',
+      headers: { 'User-Agent': 'Tauri-App' }
+    });
+    if (!response.ok) return;
+    const res = await response.json();
+    if (res.code === 0 && res.data) {
+      applyCount(id, res.data.downloadCount, res.data.viewCount);
+    }
+  } catch {
+    // 统计失败不影响主流程
+  }
+}
+
+export async function reportModDownload(id: string) {
+  try {
+    const response = await fetch(`${PUBLIC_API}/mod/${id}/download`, {
+      method: 'POST',
+      headers: { 'User-Agent': 'Tauri-App' }
+    });
+    if (!response.ok) return;
+    const res = await response.json();
+    if (res.code === 0 && res.data) {
+      applyCount(id, res.data.downloadCount, res.data.viewCount);
+    }
+  } catch {
+    // 统计失败不影响主流程
+  }
+}
+
 // 清空模组列表
 export function clearModList() {
   modList.value = [];
@@ -82,6 +130,8 @@ export function useModListStore() {
     lastFetchTime,
     error,
     fetchModList,
-    clearModList
+    clearModList,
+    reportModView,
+    reportModDownload
   };
 }

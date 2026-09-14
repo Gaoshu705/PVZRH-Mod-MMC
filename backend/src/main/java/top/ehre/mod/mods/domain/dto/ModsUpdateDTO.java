@@ -37,6 +37,9 @@ public class ModsUpdateDTO {
     @ApiModelProperty("Mod介绍")
     private String modDescription;
 
+    @ApiModelProperty("模组图标")
+    private String iconUrl;
+
     @ApiModelProperty("视频地址")
     private String videoUrl;
 

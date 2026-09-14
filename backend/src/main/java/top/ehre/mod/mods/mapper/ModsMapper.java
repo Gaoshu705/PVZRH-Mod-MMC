@@ -30,10 +30,14 @@ public interface ModsMapper extends BaseMapper<ModsEntity> {
 
     int deleteOtherAuthor(@Param("id") String modId);
 
+    int incrementDownloadCount(@Param("id") String id);
+
+    int incrementViewCount(@Param("id") String id);
+
     class ModsSqlProvider {
         public String queryPage(final Page page, final ModsPageDTO pageDTO) {
             return new SQL() {{
-                SELECT("id,mod_name,english_name,author_id,mod_description,video_url,game_name,supported_versions,is_preposition,is_modpack,framework_name,show_direct_url,download_direct_url,download_cloud_url,version,file_size,download_count,view_count,is_approved,is_featured,is_visible,created_at,updated_at");
+                SELECT("id,mod_name,english_name,author_id,mod_description,icon_url,video_url,game_name,supported_versions,is_preposition,is_modpack,framework_name,show_direct_url,download_direct_url,download_cloud_url,version,file_size,download_count,view_count,is_approved,is_featured,is_visible,created_at,updated_at");
                 FROM("mods");
                 if (pageDTO != null) {
                     if (pageDTO.getAuthorId() != null && !pageDTO.getAuthorId().isBlank()){

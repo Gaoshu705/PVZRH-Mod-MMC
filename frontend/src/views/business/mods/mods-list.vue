@@ -103,6 +103,19 @@
         >
           <el-table-column type="selection" width="42" />
           <el-table-column prop="id" label="ID" min-width="50" align="center" />
+          <el-table-column label="图标" width="80" align="center">
+            <template #default="scope">
+              <el-image
+                v-if="scope.row.iconUrl"
+                :src="scope.row.iconUrl"
+                :preview-src-list="[scope.row.iconUrl]"
+                :preview-teleported="true"
+                fit="cover"
+                style="width: 48px; height: 48px; border-radius: 8px"
+              />
+              <span v-else style="color: var(--el-text-color-placeholder)">无</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="modName" label="Mod名称" min-width="120" align="center"/>
           <el-table-column prop="modDescription" label="Mod介绍" min-width="120" align="center"/>
           <el-table-column prop="isVisible" label="是否发布" min-width="120" align="center">
@@ -137,9 +150,8 @@
             </template>
           </el-table-column>
           <el-table-column prop="version" label="Mod版本" min-width="100" align="center"/>
-          <!-- <el-table-column prop="fileSize" label="文件大小" min-width="100" align="center"/> -->
-          <!-- <el-table-column prop="downloadCount" label="下载次数" min-width="100" align="center"/>
-          <el-table-column prop="viewCount" label="查看次数" min-width="100" align="center"/> -->
+          <el-table-column prop="downloadCount" label="下载次数" min-width="100" align="center"/>
+          <el-table-column prop="viewCount" label="浏览次数" min-width="100" align="center"/>
           <el-table-column prop="createdAt" label="创建时间" min-width="200" align="center"/>
           <el-table-column fixed="right" label="操作" width="120" align="center">
             <template #default="scope">
@@ -311,6 +323,7 @@ const sortItemOptions = ref([
   {label: 'Mod英文名', column: 'english_name', isAsc: false},
   {label: '作者ID', column: 'author_id', isAsc: false},
   {label: 'Mod介绍', column: 'mod_description', isAsc: false},
+  {label: '模组图标', column: 'icon_url', isAsc: false},
   {label: '支持游戏', column: 'game_name', isAsc: false},
   {label: '支持版本', column: 'supported_versions', isAsc: false},
   {label: 'Mod框架', column: 'framework_name', isAsc: false},

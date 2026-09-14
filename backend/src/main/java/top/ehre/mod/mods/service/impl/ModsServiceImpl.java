@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import top.ehre.mod.mods.domain.vo.ModsVO;
+import top.ehre.mod.mods.domain.vo.ModsCountVO;
 import top.ehre.mod.mods.domain.dto.ModsPageDTO;
 import top.ehre.mod.mods.domain.dto.ModsAddDTO;
 import top.ehre.mod.mods.domain.dto.ModsUpdateDTO;
@@ -177,5 +178,45 @@ public class ModsServiceImpl extends ServiceImpl<ModsMapper, ModsEntity> impleme
     @Override
     public int addOtherAuthor(String id, String authorId) {
         return modsMapper.addOtherAuthor(id, authorId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Throwable.class)
+    public ModsCountVO incrementDownloadCount(String id) {
+        requirePublishedMod(id);
+        int rows = modsMapper.incrementDownloadCount(id);
+        if (rows == 0) {
+            throw new BusinessException("更新失败");
+        }
+        return toCountVO(getById(id));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Throwable.class)
+    public ModsCountVO incrementViewCount(String id) {
+        requirePublishedMod(id);
+        int rows = modsMapper.incrementViewCount(id);
+        if (rows == 0) {
+            throw new BusinessException("更新失败");
+        }
+        return toCountVO(getById(id));
+    }
+
+    private ModsEntity requirePublishedMod(String id) {
+        ModsEntity mods = getById(id);
+        if (mods == null) {
+            throw new BusinessException("不存在该对象");
+        }
+        if (!Boolean.TRUE.equals(mods.getIsVisible())) {
+            throw new BusinessException("模组未发布");
+        }
+        return mods;
+    }
+
+    private ModsCountVO toCountVO(ModsEntity mods) {
+        return new ModsCountVO()
+                .setId(mods.getId())
+                .setDownloadCount(mods.getDownloadCount())
+                .setViewCount(mods.getViewCount());
     }
 }
