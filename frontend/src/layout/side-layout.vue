@@ -79,14 +79,14 @@ const route = useRoute()
 
 <style lang="scss" scoped>
 .mod-layout {
-  height: 100%;
+  height: 100vh;
   width: 100%;
   overflow: hidden;
   background: var(--admin-bg);
 
   .mod-layout-aside {
-    height: 100%;
-    overflow-x: hidden;
+    height: 100vh;
+    overflow: hidden;
     box-shadow: 4px 0 24px rgba(15, 23, 42, 0.08);
     z-index: 30;
   }
@@ -94,7 +94,7 @@ const route = useRoute()
   .mod-layout-container {
     min-width: 0;
     flex: 1;
-    height: 100%;
+    height: 100vh;
     overflow: hidden;
     background: var(--admin-bg);
 
@@ -104,6 +104,7 @@ const route = useRoute()
       padding: 0;
       z-index: 21;
       height: auto;
+      flex-shrink: 0;
       box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
 
       .mod-layout-header-action {
@@ -151,6 +152,8 @@ const route = useRoute()
 
     .mod-layout-main {
       min-width: 0;
+      min-height: 0;
+      flex: 1;
       overflow-x: hidden;
       overflow-y: auto;
       padding: 16px 20px;
@@ -165,6 +168,7 @@ const route = useRoute()
       align-items: center;
       background-color: transparent;
       height: 40px;
+      flex-shrink: 0;
       color: #94a3b8;
       font-size: 12px;
       border-top: none;

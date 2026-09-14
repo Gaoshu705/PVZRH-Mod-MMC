@@ -1,6 +1,8 @@
 <template>
   <el-config-provider :locale="locale">
-    <div v-loading="loading"
+    <div
+         class="app-shell"
+         v-loading="loading"
          element-loading-text="加载中..."
          :element-loading-spinner="svg"
          element-loading-svg-view-box="-10, -10, 50, 50">
@@ -32,6 +34,18 @@ watch(themeColor, () => {
 }, {immediate: true});
 </script>
 <style lang="scss">
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+.el-config-provider,
+.app-shell {
+  height: 100%;
+}
+
 body {
   background-color: var(--admin-bg, #f3f5f9);
   margin: 0;

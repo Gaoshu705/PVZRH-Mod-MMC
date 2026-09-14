@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * @author LibrhHp_0928
@@ -38,6 +40,12 @@ public class GlobalExceptionHandler {
         String requestURL = request == null ? "" : request.getRequestURL().toString();
         log.error("[{}] [{}] error: {}", ip, requestURL, e.getMessage());
         return Result.fail(104, "权限不足");
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Void> noResourceFoundExceptionHandler(NoResourceFoundException e) {
+        log.warn("static resource not found: {}", e.getResourcePath());
+        return ResponseEntity.notFound().build();
     }
 
     /**

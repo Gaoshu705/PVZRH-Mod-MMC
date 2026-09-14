@@ -8,7 +8,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import java.io.File;
+import top.ehre.mod.util.FileStoragePaths;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @SpringBootApplication
 public class ModAdminServerApplication {
@@ -26,8 +29,9 @@ public class ModAdminServerApplication {
     @Bean
     public CommandLineRunner init() {
         return args -> {
-            File localDir = new File(localPath);
-            if (!localDir.exists()) localDir.mkdirs();
+            Path localDir = FileStoragePaths.root(localPath);
+            Files.createDirectories(localDir);
+            log.info("file.localPath resolved to {}", localDir);
             log.info("ModAdminServer init success");
         };
     }

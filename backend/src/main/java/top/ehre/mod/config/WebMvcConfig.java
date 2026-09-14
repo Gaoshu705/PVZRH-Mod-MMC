@@ -12,8 +12,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import top.ehre.mod.util.FileStoragePaths;
 
 /**
  * @author LibrhHp_0928
@@ -29,15 +28,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        System.out.println("localPath:" + localPath);
+        String location = FileStoragePaths.resourceLocation(localPath);
+        log.info("static resource location: {} -> {}", localPath, location);
         registry.addResourceHandler("/static/**")
-                .addResourceLocations(
-                        "file:" + localPath
-                );
-        registry.addResourceHandler("/default/**" )
-                .addResourceLocations(
-                        "classpath:/public/"
-                );
+                .addResourceLocations(location);
+        registry.addResourceHandler("/default/**")
+                .addResourceLocations("classpath:/public/");
     }
 
 

@@ -1,14 +1,14 @@
 <template>
   <div class="side-menu" :style="{width: !collapse ? sideMenuWidth : 'auto'}">
+    <div class="logo" @click="onGoHome">
+      <img class="logo-img" src="/logo.png"/>
+      <div class="title" v-show="!collapse">{{ websiteName }}</div>
+    </div>
     <el-menu mode="vertical"
              :collapse="collapse"
              :default-openeds="openedMenuIds"
              :default-active="activeMenuId"
     >
-      <div class="logo" @click="onGoHome">
-        <img class="logo-img" src="/logo.png"/>
-        <div class="title" v-show="!collapse">{{ websiteName }}</div>
-      </div>
       <recursiveMenu
           v-for="item in menuData"
           :key="item.menuId"
@@ -74,6 +74,8 @@ watch(
 <style scoped lang="scss">
 .side-menu {
   height: 100%;
+  display: flex;
+  flex-direction: column;
   background: var(--admin-sidebar-bg);
 
   .logo {
@@ -82,6 +84,7 @@ watch(
     height: var(--admin-header-height);
     padding: 0 14px;
     cursor: pointer;
+    flex-shrink: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
     .logo-img {
@@ -103,7 +106,9 @@ watch(
   }
 
   .el-menu {
-    height: calc(100% - var(--admin-header-height));
+    flex: 1;
+    min-height: 0;
+    height: auto;
     background: var(--admin-sidebar-bg);
     --el-menu-bg-color: var(--admin-sidebar-bg);
     --el-menu-hover-bg-color: rgba(255, 255, 255, 0.08);
@@ -112,6 +117,7 @@ watch(
     --el-menu-item-height: 46px;
     padding: 8px 8px 16px;
     box-sizing: border-box;
+    overflow-x: hidden;
     overflow-y: auto;
 
     :deep(.el-menu-item),

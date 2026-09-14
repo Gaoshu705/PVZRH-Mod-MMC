@@ -22,8 +22,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import top.ehre.mod.util.FileStoragePaths;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 /**
@@ -34,6 +41,8 @@ import java.util.List;
  */
 @Service
 public class FileServiceImpl extends ServiceImpl<FileMapper, FileEntity> implements FileService {
+
+    private static final Logger log = LoggerFactory.getLogger(FileServiceImpl.class);
 
     @Resource
     FileMapper fileMapper;
@@ -49,8 +58,12 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, FileEntity> impleme
     public Result fileUpload(MultipartFile file, Byte folderType) {
         FolderTypeEnum folderTypeEnum = FolderTypeEnum.getByValue(folderType);
         if (folderTypeEnum == null) throw new BusinessException("不存在该文件夹类型");
+        if (file == null || file.isEmpty()) throw new BusinessException("上传文件不能为空");
         String originalFilename = file.getOriginalFilename();
         String extension = FileUtil.extName(originalFilename);
+        if (extension == null || extension.isBlank()) {
+            extension = "bin";
+        }
 
         FileEntity fileEntity = new FileEntity();
         fileEntity.setFileName(originalFilename)
@@ -61,13 +74,24 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, FileEntity> impleme
         if (!saved) throw new BusinessException("添加失败");
 
         String newFilename = fileEntity.getFileId() + "." + extension;
-        File directory = new File(localPath, folderTypeEnum.getDesc());
-        directory.mkdirs();
-        File newFile = new File(directory.getAbsolutePath(), newFilename);
+        Path directory = FileStoragePaths.folder(localPath, folderTypeEnum.getDesc());
+        Path dest = directory.resolve(newFilename);
         try {
-            file.transferTo(newFile); // 保存到本地中
+            Files.createDirectories(directory);
+            try (InputStream in = file.getInputStream()) {
+                Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
+            }
+            if (!Files.isRegularFile(dest) || Files.size(dest) <= 0) {
+                throw new IOException("文件写入后不存在: " + dest.toAbsolutePath());
+            }
+            log.info("file uploaded: {}", dest.toAbsolutePath());
         } catch (IOException e) {
-            if (newFile.exists() && newFile.isFile()) newFile.delete();
+            log.error("file upload failed, dest={}", dest.toAbsolutePath(), e);
+            try {
+                Files.deleteIfExists(dest);
+            } catch (IOException ignored) {
+            }
+            removeById(fileEntity.getFileId());
             return Result.fail("上传失败");
         }
         FileVO fileVO = new FileVO();
