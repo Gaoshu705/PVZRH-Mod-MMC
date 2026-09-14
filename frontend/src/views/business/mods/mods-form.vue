@@ -1,93 +1,125 @@
 <template>
   <div class="drawer-form">
-    <el-drawer :title="addFlag ? '添加' : '编辑'" :size="500" v-model="visibleFlag" :before-close="onClose">
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="Mod名称" prop="modName">
-          <el-input v-model="form.modName" placeholder="Mod名称" />
+    <el-drawer
+      class="mods-form-drawer"
+      :title="addFlag ? '添加模组' : '编辑模组'"
+      :size="drawerSize"
+      v-model="visibleFlag"
+      :before-close="onClose"
+      destroy-on-close
+    >
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="108px" class="mods-form">
+        <div class="form-section-title">基本信息</div>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="Mod名称" prop="modName">
+              <el-input v-model="form.modName" placeholder="请输入 Mod 名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Mod英文名" prop="englishName">
+              <el-input v-model="form.englishName" placeholder="请输入英文名" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12" v-if="hasPerm('business:mod:sup')">
+            <el-form-item label="作者" prop="authorId">
+              <el-select v-model="form.authorId" placeholder="请选择作者" filterable style="width: 100%">
+                <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
+                  <div class="option-item">
+                    <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
+                    <span>{{ item.nickname }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="添加共创" prop="otherAuthor">
+              <el-select v-model="form.otherAuthors" multiple placeholder="请选择共创作者" filterable style="width: 100%">
+                <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
+                  <div class="option-item">
+                    <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
+                    <span>{{ item.nickname }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="支持游戏" prop="gameName">
+              <el-input v-model="form.gameName" placeholder="支持游戏" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="支持版本" prop="supportedVersions">
+              <el-input v-model="form.supportedVersions" placeholder="支持版本" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Mod框架" prop="frameworkName">
+              <el-select v-model="form.frameworkName" clearable placeholder="请选择 Mod 框架" style="width: 100%">
+                <el-option v-for="(option, index) in frameworkNameOptions" :key="index" :label="option.label"
+                  :value="option.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Mod版本" prop="version">
+              <el-input v-model="form.version" placeholder="例如 1.0.0" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="视频Url" prop="videoUrl">
+              <el-input v-model="form.videoUrl" placeholder="视频地址，选填" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <div class="form-section-title">模组介绍</div>
+        <el-form-item prop="modDescription" class="mod-description-item" label-width="0">
+          <MdEditor
+            v-model="form.modDescription"
+            language="zh-CN"
+            previewTheme="github"
+            placeholder="请输入 Mod 介绍，支持 Markdown 语法"
+            :footers="[]"
+            :toolbarsExclude="['github']"
+            style="width: 100%; height: 400px"
+            @onUploadImg="onUploadImg"
+          />
         </el-form-item>
-        <el-form-item label="Mod英文名" prop="englishName">
-          <el-input v-model="form.englishName" placeholder="Mod英文名" />
-        </el-form-item>
-        <el-form-item label="作者ID" prop="authorId" v-if="hasPerm('business:mod:sup')">
-          <!-- <el-input v-model="form.authorId" placeholder="作者ID" /> -->
-          <el-select v-model="form.authorId" placeholder="请选择作者" style="width: 240px">
-            <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
-              <div class="option-item">
-                <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
-                <span :style="{ color: item.userId }">{{ item.nickname }}</span>
-              </div>
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Mod介绍" prop="modDescription">
-          <el-input v-model="form.modDescription" placeholder="Mod介绍" />
-        </el-form-item>
-        <el-form-item label="视频Url" prop="videoUrl">
-          <el-input v-model="form.videoUrl" placeholder="视频Url" />
-        </el-form-item>
-        <el-form-item label="支持游戏" prop="gameName">
-          <el-input v-model="form.gameName" placeholder="支持游戏" />
-        </el-form-item>
-        <el-form-item label="支持版本" prop="supportedVersions">
-          <el-input v-model="form.supportedVersions" placeholder="支持版本" />
-        </el-form-item>
-        <el-form-item label="是否前置" prop="isPreposition" v-if="hasPerm('business:mod:sup')">
-          <el-switch v-model="form.isPreposition" :active-value="true" />
-        </el-form-item>
-        <el-form-item label="Mod框架" prop="frameworkName">
-          <el-select v-model="form.frameworkName" clearable placeholder="Mod框架">
-            <el-option v-for="(option, index) in frameworkNameOptions" :key="index" :label="option.label"
-              :value="option.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="直链下载地址" prop="downloadDirectUrl" label-width="auto">
+
+        <div class="form-section-title">下载信息</div>
+        <el-form-item label="直链下载" prop="downloadDirectUrl">
           <el-input v-model="form.downloadDirectUrl" placeholder="直链下载地址" />
         </el-form-item>
-        <el-form-item label="网盘下载地址" prop="downloadCloudUrl" label-width="auto">
+        <el-form-item label="网盘下载" prop="downloadCloudUrl">
           <el-input v-model="form.downloadCloudUrl" placeholder="网盘下载地址" />
         </el-form-item>
-        <el-form-item label="Mod版本" prop="version">
-          <el-input v-model="form.version" placeholder="Mod版本" />
-        </el-form-item>
-        <el-form-item label="文件大小" prop="fileSize" v-if="false">
-          <el-input-number v-model="form.fileSize" placeholder="文件大小" />
-        </el-form-item>
-        <el-form-item label="下载次数" prop="downloadCount" v-if="false">
-          <el-input v-model="form.downloadCount" placeholder="下载次数" />
-        </el-form-item>
-        <el-form-item label="查看次数" prop="viewCount" v-if="false">
-          <el-input v-model="form.viewCount" placeholder="查看次数" />
-        </el-form-item>
-        <el-form-item label="是否通过审核" prop="isApproved" v-if="false">
-          <el-switch v-model="form.isApproved" :active-value="true" />
-        </el-form-item>
-        <el-form-item label="是否推荐" prop="isFeatured" v-if="hasPerm('business:mod:sup')">
-          <el-switch v-model="form.isFeatured" :active-value="true" />
-        </el-form-item>
-        <el-form-item label="添加共创" prop="otherAuthor">
-          <el-select v-model="form.otherAuthors" multiple placeholder="请选择作者" style="width: 240px">
-            <el-option v-for="item in userList" :key="item.userId" :label="item.nickname" :value="item.userId">
-              <div class="option-item">
-                <el-avatar size="small" :src="item.avatar" style="margin-right: 8px;" />
-                <span :style="{ color: item.userId }">{{ item.nickname }}</span>
-              </div>
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="是否显示直链" prop="showDirectUrl">
-          <el-switch v-model="form.showDirectUrl" :active-value="true" />
-        </el-form-item>
-        <el-form-item label="是否发布" prop="isVisible">
-          <el-switch v-model="form.isVisible" :active-value="true" />
-        </el-form-item>
-        <el-form-item label="创建时间" prop="createdAt" v-if="false">
-          <el-date-picker v-model="form.createdAt" type="datetime" placeholder="创建时间" format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss" />
-        </el-form-item>
-        <el-form-item label="修改时间" prop="updatedAt" v-if="false">
-          <el-date-picker v-model="form.updatedAt" type="datetime" placeholder="修改时间" format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss" />
-        </el-form-item>
+
+        <div class="form-section-title">发布设置</div>
+        <el-row :gutter="16">
+          <el-col :span="8" v-if="hasPerm('business:mod:sup')">
+            <el-form-item label="是否前置" prop="isPreposition">
+              <el-switch v-model="form.isPreposition" :active-value="true" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8" v-if="hasPerm('business:mod:sup')">
+            <el-form-item label="是否推荐" prop="isFeatured">
+              <el-switch v-model="form.isFeatured" :active-value="true" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="显示直链" prop="showDirectUrl">
+              <el-switch v-model="form.showDirectUrl" :active-value="true" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="是否发布" prop="isVisible">
+              <el-switch v-model="form.isVisible" :active-value="true" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
 
       <template #footer>
@@ -100,50 +132,38 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref, nextTick } from 'vue';
+import { reactive, ref, nextTick, computed } from 'vue';
 import _ from 'lodash';
 import { ElMessage } from 'element-plus';
+import { MdEditor } from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
 import { modsApi } from '@/api/mods-api';
 import { userApi } from '@/api/user-api';
+import { fileApi } from '@/api/file-api.js';
 import { hasPerm } from "@/utils/permission.js";
-// ------------------------ 联表查询VO ------------------------
-const queryFormState = {
-  pageNum: 1,
-  pageSize: 10,
-  sortItemList: []
-}
 
-// ------------------------ 中间表更新vo ------------------------
-// ------------------------ 枚举量 ------------------------
 const frameworkNameOptions = [
   { label: 'Bepinex', value: '1' },
   { label: 'MelonLoader', value: '2' },
 ]
 
-
-
-// ------------------------ 图片上传 ------------------------
-// ------------------------ 事件 ------------------------
-
 const emits = defineEmits(['reloadList']);
 
-// ------------------------ 显示与隐藏 ------------------------
-// 是否显示
 const visibleFlag = ref(false);
-// 是否新增
 const addFlag = ref(false);
-
 const userList = ref([]);
+const drawerSize = computed(() => (window.innerWidth < 960 ? '96%' : '880px'));
 
 function show(rowData) {
   userApi.getList().then(res => {
-    console.log(res);
     userList.value = res.data;
   });
   Object.assign(form, formDefault);
   if (rowData && !_.isEmpty(rowData)) {
     Object.assign(form, rowData);
   }
+  form.modDescription = form.modDescription || '';
+  form.otherAuthors = form.otherAuthors || [];
   visibleFlag.value = true;
   addFlag.value = rowData.id == null;
   nextTick(() => {
@@ -153,41 +173,55 @@ function show(rowData) {
 
 function onClose() {
   Object.keys(form).forEach(key => form[key] = null);
+  form.modDescription = '';
+  form.otherAuthors = [];
   visibleFlag.value = false;
 }
 
-function onSelectUser(item) {
-  form.otherAuthor = item.nickname;
+async function onUploadImg(files, callback) {
+  try {
+    const urls = [];
+    for (const file of files) {
+      const fileForm = new FormData();
+      fileForm.append('file', file);
+      const res = await fileApi.upload(fileForm, 2);
+      if (res.data?.fileUrl) {
+        urls.push(res.data.fileUrl);
+      }
+    }
+    callback(urls);
+  } catch (err) {
+    ElMessage.error('图片上传失败');
+    callback([]);
+  }
 }
 
-// ------------------------ 表单 ------------------------
-
-// 组件ref
 const formRef = ref();
 
 const formDefault = {
-  id: undefined, // ID
-  modName: undefined, // Mod名称
-  englishName: undefined, // Mod英文名
-  authorId: undefined, // 作者ID
-  modDescription: undefined, // Mod介绍
-  gameName: undefined, // 支持游戏
-  supportedVersions: undefined, // 支持版本
-  isPreposition: undefined, // 是否前置
-  frameworkName: undefined, // Mod框架
-  downloadDirectUrl: undefined, // 直链下载地址
-  downloadCloudUrl: undefined, // 网盘下载地址
-  version: undefined, // Mod版本
-  fileSize: undefined, // 文件大小
-  otherAuthors: undefined, // 其它作者
-  showDirectUrl: undefined, // 是否显示直链
-  downloadCount: undefined, // 下载次数
-  viewCount: undefined, // 查看次数
-  isApproved: undefined, // 是否通过审核
-  isFeatured: undefined, // 是否推荐
-  isVisible: undefined, // 是否可见
-  createdAt: undefined, // 创建时间
-  updatedAt: undefined, // 修改时间
+  id: undefined,
+  modName: undefined,
+  englishName: undefined,
+  authorId: undefined,
+  modDescription: '',
+  videoUrl: undefined,
+  gameName: undefined,
+  supportedVersions: undefined,
+  isPreposition: undefined,
+  frameworkName: undefined,
+  downloadDirectUrl: undefined,
+  downloadCloudUrl: undefined,
+  version: undefined,
+  fileSize: undefined,
+  otherAuthors: [],
+  showDirectUrl: undefined,
+  downloadCount: undefined,
+  viewCount: undefined,
+  isApproved: undefined,
+  isFeatured: undefined,
+  isVisible: undefined,
+  createdAt: undefined,
+  updatedAt: undefined,
 };
 
 let form = reactive({ ...formDefault });
@@ -226,8 +260,6 @@ const rules = {
   }]
 };
 
-
-// 点击确定，验证表单
 async function onSubmit() {
   try {
     await formRef.value.validate();
@@ -237,7 +269,6 @@ async function onSubmit() {
   }
 }
 
-// 新建、编辑API
 async function save() {
   try {
     if (addFlag.value) {
@@ -261,5 +292,51 @@ defineExpose({
 .option-item {
   display: flex;
   align-items: center;
+}
+
+.mods-form {
+  padding-right: 8px;
+}
+
+.form-section-title {
+  margin: 4px 0 16px;
+  padding-left: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  line-height: 1;
+  border-left: 3px solid var(--el-color-primary);
+}
+
+.form-section-title + .el-row,
+.form-section-title + .el-form-item {
+  margin-top: 0;
+}
+
+.mod-description-item {
+  margin-bottom: 22px;
+
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+    width: 100%;
+    line-height: normal;
+  }
+}
+</style>
+
+<style lang="scss">
+.mods-form-drawer {
+  .el-drawer__header {
+    margin-bottom: 8px;
+    padding: 16px 20px 12px;
+  }
+
+  .el-drawer__body {
+    padding: 8px 20px 16px;
+  }
+
+  .md-editor {
+    border-radius: 6px;
+  }
 }
 </style>
